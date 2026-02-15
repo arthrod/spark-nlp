@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.7.4-gpu
+FROM tensorflow/tensorflow:2.21.0rc0-gpu
 
 # Fetch keys for apt
 RUN rm /etc/apt/sources.list.d/cuda.list && \

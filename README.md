@@ -311,3 +311,4 @@ Clone the repo and submit your pull-requests! Or directly create issues in this 
 ## John Snow Labs
 
 [http://johnsnowlabs.com](http://johnsnowlabs.com)
+

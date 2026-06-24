@@ -32,7 +32,7 @@ class NLLBTransformer(AnnotatorModel, HasBatchedAnnotate, HasEngine):
     ...     .setOutputCol("generation")
 
 
-    The default model is ``"nllb_418M"``, if no name is provided. For available
+    The default model is ``"nllb_distilled_600M_8int"``, if no name is provided. For available
     pretrained models please see the `Models Hub
     <https://sparknlp.org/models?q=nllb>`__.
 
@@ -77,7 +77,7 @@ class NLLBTransformer(AnnotatorModel, HasBatchedAnnotate, HasEngine):
         Target Language (Default: `fr`)
 
     Languages Covered
-    -----
+    -----------------
     Acehnese (Arabic script) (ace_Arab), Acehnese (Latin script) (ace_Latn), Mesopotamian Arabic
     (acm_Arab), Ta’izzi-Adeni Arabic (acq_Arab), Tunisian Arabic (aeb_Arab), Afrikaans (afr_Latn),
     South Levantine Arabic (ajp_Arab), Akan (aka_Latn), Amharic (amh_Ethi), North Levantine Arabic
@@ -164,7 +164,7 @@ class NLLBTransformer(AnnotatorModel, HasBatchedAnnotate, HasEngine):
     >>> documentAssembler = DocumentAssembler() \\
     ...     .setInputCol("text") \\
     ...     .setOutputCol("documents")
-    >>> nllb = NLLBTransformer.pretrained("nllb_418M") \\
+    >>> nllb = NLLBTransformer.pretrained("nllb_distilled_600M_8int") \\
     ...     .setInputCols(["documents"]) \\
     ...     .setMaxOutputLength(50) \\
     ...     .setOutputCol("generation") \\
@@ -398,13 +398,13 @@ class NLLBTransformer(AnnotatorModel, HasBatchedAnnotate, HasEngine):
         return NLLBTransformer(java_model=jModel)
 
     @staticmethod
-    def pretrained(name="nllb_418M", lang="xx", remote_loc=None):
+    def pretrained(name="nllb_distilled_600M_8int", lang="xx", remote_loc=None):
         """Downloads and loads a pretrained model.
 
         Parameters
         ----------
         name : str, optional
-            Name of the pretrained model, by default "nllb_418M"
+            Name of the pretrained model, by default "nllb_distilled_600M_8int"
         lang : str, optional
             Language of the pretrained model, by default "en"
         remote_loc : str, optional

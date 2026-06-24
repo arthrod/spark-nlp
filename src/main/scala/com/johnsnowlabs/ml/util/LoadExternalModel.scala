@@ -18,6 +18,7 @@ package com.johnsnowlabs.ml.util
 
 import com.johnsnowlabs.ml.tensorflow.sentencepiece.SentencePieceWrapper
 import com.johnsnowlabs.nlp.util.io.{ExternalResource, ReadAs, ResourceHelper}
+import org.glassfish.jersey.internal.inject.Custom
 
 import java.io.File
 import java.nio.file.Paths
@@ -84,41 +85,68 @@ object LoadExternalModel {
       modelPath: String,
       isEncoderDecoder: Boolean = false,
       withPast: Boolean = false,
-      isDecoder: Boolean = false): Boolean = {
-    if (isEncoderDecoder) {
-      val onnxEncoderModel = new File(modelPath, ONNX.encoderModel)
-      val onnxDecoderModel =
-        if (withPast) new File(modelPath, ONNX.decoderWithPastModel)
-        else new File(modelPath, ONNX.decoderModel)
-      onnxEncoderModel.exists() && onnxDecoderModel.exists()
-    } else if (isDecoder) {
-      val onnxDecoderModel =
-        if (withPast) new File(modelPath, ONNX.decoderWithPastModel)
-        else new File(modelPath, ONNX.decoderModel)
-      onnxDecoderModel.exists()
-    } else {
-      val onnxModel = new File(modelPath, ONNX.modelName)
-      onnxModel.exists()
+      isDecoder: Boolean = false,
+      customModelNames: Option[List[String]] = None): Boolean = {
+    customModelNames match {
+      case Some(modelNames) if modelNames.nonEmpty =>
+        modelNames.forall(modelName => new File(modelPath, modelName).exists())
+      case Some(_) => false
+      case None =>
+        if (isEncoderDecoder) {
+          val onnxEncoderModel = new File(modelPath, ONNX.encoderModel)
+          val onnxDecoderModel =
+            if (withPast) new File(modelPath, ONNX.decoderWithPastModel)
+            else new File(modelPath, ONNX.decoderModel)
+          onnxEncoderModel.exists() && onnxDecoderModel.exists()
+        } else if (isDecoder) {
+          val onnxDecoderModel =
+            if (withPast) new File(modelPath, ONNX.decoderWithPastModel)
+            else new File(modelPath, ONNX.decoderModel)
+          onnxDecoderModel.exists()
+        } else {
+          val onnxModel = new File(modelPath, ONNX.modelName)
+          onnxModel.exists()
+        }
     }
 
   }
 
-  def isOpenvinoModel(modelPath: String, isEncoderDecoder: Boolean): Boolean = {
-    if (isEncoderDecoder) {
-      val ovEncoderModelXml = new File(modelPath, s"${Openvino.encoderModel}.xml")
-      val ovEncoderModelBin = new File(modelPath, s"${Openvino.encoderModel}.bin")
-      val ovDecoderModelXml = new File(modelPath, s"${Openvino.decoderModel}.xml")
-      val ovDecoderModelBin = new File(modelPath, s"${Openvino.decoderModel}.bin")
-      val ovDecoderModelWithPastXml = new File(modelPath, s"${Openvino.decoderModelWithPast}.xml")
-      val ovDecoderModelWithPastBin = new File(modelPath, s"${Openvino.decoderModelWithPast}.bin")
+  def isOpenvinoModel(
+      modelPath: String,
+      isEncoderDecoder: Boolean,
+      custom: Option[List[String]] = None): Boolean = {
 
-      ovEncoderModelXml.exists() && ovEncoderModelBin.exists() &&
-      ovDecoderModelXml.exists() && ovDecoderModelBin.exists() &&
-      ovDecoderModelWithPastXml.exists() && ovDecoderModelWithPastBin.exists()
+    if (custom.isDefined) {
+      for (model <- custom.get) {
+        val ovModelXml = new File(modelPath, s"${model}.xml")
+        val ovModelBin = new File(modelPath, s"${model}.bin")
+        if (!ovModelXml.exists() || !ovModelBin.exists()) {
+          // If any of the custom models are missing, return false
+          println(s"Custom model $model is missing")
+          println(s"Model $model not found in $modelPath")
+          return false
+        }
+      }
+      true
     } else {
-      val modelXml = new File(modelPath, s"${Openvino.ovModel}.xml")
-      val modelBin = new File(modelPath, s"${Openvino.ovModel}.bin")
-      modelXml.exists() && modelBin.exists()
+      if (isEncoderDecoder) {
+        val ovEncoderModelXml = new File(modelPath, s"${Openvino.encoderModel}.xml")
+        val ovEncoderModelBin = new File(modelPath, s"${Openvino.encoderModel}.bin")
+        val ovDecoderModelXml = new File(modelPath, s"${Openvino.decoderModel}.xml")
+        val ovDecoderModelBin = new File(modelPath, s"${Openvino.decoderModel}.bin")
+        val ovDecoderModelWithPastXml =
+          new File(modelPath, s"${Openvino.decoderModelWithPast}.xml")
+        val ovDecoderModelWithPastBin =
+          new File(modelPath, s"${Openvino.decoderModelWithPast}.bin")
+
+        ovEncoderModelXml.exists() && ovEncoderModelBin.exists() &&
+        ovDecoderModelXml.exists() && ovDecoderModelBin.exists() &&
+        ovDecoderModelWithPastXml.exists() && ovDecoderModelWithPastBin.exists()
+      } else {
+        val modelXml = new File(modelPath, s"${Openvino.ovModel}.xml")
+        val modelBin = new File(modelPath, s"${Openvino.ovModel}.bin")
+        modelXml.exists() && modelBin.exists()
+      }
     }
   }
 
@@ -126,7 +154,9 @@ object LoadExternalModel {
       modelPath: String,
       isEncoderDecoder: Boolean = false,
       withPast: Boolean = false,
-      isDecoder: Boolean = false): String = {
+      isDecoder: Boolean = false,
+      custom: Option[List[String]] = None,
+      customOnnxModelNames: Option[List[String]] = None): String = {
 
     /** Check if the path is correct */
     val f = new File(modelPath)
@@ -134,8 +164,12 @@ object LoadExternalModel {
     require(f.isDirectory, s"Folder $modelPath is not folder")
 
     /*Check if the assets path is correct*/
-    val assetsPath = Paths.get(modelPath, "/assets").toString
-    val assetsPathFile = new File(assetsPath)
+    val legacyAssetsPath = Paths.get(modelPath, "/assets").toString
+    val fallbackAssetsPath = Paths.get(modelPath, "assets").toString
+    val legacyAssetsPathFile = new File(legacyAssetsPath)
+    val assetsPathFile =
+      if (legacyAssetsPathFile.exists()) legacyAssetsPathFile else new File(fallbackAssetsPath)
+    val assetsPath = assetsPathFile.getPath
     require(assetsPathFile.exists, s"Folder $assetsPath not found")
     require(assetsPathFile.isDirectory, s"Folder $assetsPath is not folder")
 
@@ -143,10 +177,16 @@ object LoadExternalModel {
     val tfSavedModelExist = isTensorFlowModel(modelPath)
 
     /*ONNX required model's name*/
-    val onnxModelExist = isOnnxModel(modelPath, isEncoderDecoder, withPast, isDecoder)
+    val onnxModelExist =
+      isOnnxModel(
+        modelPath,
+        isEncoderDecoder,
+        withPast,
+        isDecoder,
+        customModelNames = customOnnxModelNames)
 
     /*Openvino required model files*/
-    val openvinoModelExist = isOpenvinoModel(modelPath, isEncoderDecoder)
+    val openvinoModelExist = isOpenvinoModel(modelPath, isEncoderDecoder, custom)
 
     if (tfSavedModelExist) {
       TensorFlow.name
@@ -176,10 +216,20 @@ object LoadExternalModel {
       path: String,
       isEncoderDecoder: Boolean = false,
       withPast: Boolean = false,
-      isDecoder: Boolean = false): (String, String) = {
+      isDecoder: Boolean = false,
+      custom: Option[List[String]] = None,
+      customOnnxModelNames: Option[List[String]] = None): (String, String) = {
     val localPath: String = ResourceHelper.copyToLocal(path)
 
-    (localPath, detectEngine(localPath, isEncoderDecoder, withPast, isDecoder))
+    (
+      localPath,
+      detectEngine(
+        localPath,
+        isEncoderDecoder,
+        withPast,
+        isDecoder,
+        custom,
+        customOnnxModelNames))
   }
 
   def loadTextAsset(assetPath: String, assetName: String): Array[String] = {

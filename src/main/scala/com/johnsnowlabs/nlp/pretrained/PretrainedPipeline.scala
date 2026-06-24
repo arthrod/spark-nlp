@@ -92,6 +92,16 @@ case class PretrainedPipeline(
   def annotate(target: Array[String]): Array[Map[String, Seq[String]]] =
     lightModel.annotate(target)
 
+  def annotateWithMeta(
+      target: String,
+      metadata: Map[String, Seq[String]]): Map[String, Seq[String]] =
+    lightModel.annotateWithMeta(target, metadata)
+
+  def annotateWithMeta(
+      targets: Array[String],
+      metadatas: Array[Map[String, Seq[String]]]): Array[Map[String, Seq[String]]] =
+    lightModel.annotateWithMeta(targets, metadatas)
+
   def annotateJava(target: String): java.util.Map[String, java.util.List[String]] =
     lightModel.annotateJava(target)
 
@@ -100,6 +110,18 @@ case class PretrainedPipeline(
     lightModel.annotateJava(targets)
   }
 
+  def annotateWithMetaJava(
+      target: String,
+      metadata: java.util.Map[String, java.util.List[String]])
+      : java.util.Map[String, java.util.List[String]] =
+    lightModel.annotateWithMetaJava(target, metadata)
+
+  def annotateWithMetaJava(
+      targets: java.util.ArrayList[String],
+      metadatas: java.util.ArrayList[java.util.Map[String, java.util.List[String]]])
+      : java.util.List[java.util.Map[String, java.util.List[String]]] =
+    lightModel.annotateWithMetaJava(targets, metadatas)
+
   def fullAnnotate(target: String, optionalTarget: String = ""): Map[String, Seq[IAnnotation]] = {
     lightModel.fullAnnotate(target, optionalTarget)
   }
@@ -107,6 +129,16 @@ case class PretrainedPipeline(
   def fullAnnotate(targets: Array[String]): Array[Map[String, Seq[IAnnotation]]] = {
     lightModel.fullAnnotate(targets)
   }
+
+  def fullAnnotateWithMeta(
+      target: String,
+      metadata: Map[String, Seq[String]]): Map[String, Seq[IAnnotation]] =
+    lightModel.fullAnnotateWithMeta(target, metadata)
+
+  def fullAnnotateWithMeta(
+      targets: Array[String],
+      metadatas: Array[Map[String, Seq[String]]]): Array[Map[String, Seq[IAnnotation]]] =
+    lightModel.fullAnnotateWithMeta(targets, metadatas)
 
   def fullAnnotate(
       targets: Array[String],
@@ -119,7 +151,7 @@ case class PretrainedPipeline(
   }
 
   def fullAnnotateImage(pathToImages: Array[String]): Array[Map[String, Seq[IAnnotation]]] = {
-    lightModel.fullAnnotateImage(pathToImages)
+    lightModel.fullAnnotateImages(pathToImages)
   }
 
   def fullAnnotate(audio: Array[Float]): Map[String, Seq[IAnnotation]] = {
@@ -145,6 +177,18 @@ case class PretrainedPipeline(
     lightModel.fullAnnotateJava(targets)
   }
 
+  def fullAnnotateWithMetaJava(
+      target: String,
+      metadata: java.util.Map[String, java.util.List[String]])
+      : java.util.Map[String, java.util.List[IAnnotation]] =
+    lightModel.fullAnnotateWithMetaJava(target, metadata)
+
+  def fullAnnotateWithMetaJava(
+      targets: java.util.ArrayList[String],
+      metadatas: java.util.ArrayList[java.util.Map[String, java.util.List[String]]])
+      : java.util.List[java.util.Map[String, java.util.List[IAnnotation]]] =
+    lightModel.fullAnnotateWithMetaJava(targets, metadatas)
+
   def fullAnnotateJava(
       targets: java.util.ArrayList[String],
       optionalTargets: java.util.ArrayList[String])
@@ -157,9 +201,14 @@ case class PretrainedPipeline(
     lightModel.fullAnnotateImageJava(pathToImage)
   }
 
-  def fullAnnotateImageJava(pathToImages: java.util.ArrayList[String])
+  def fullAnnotateImageJava(
+      pathToImages: java.util.ArrayList[String],
+      texts: java.util.ArrayList[String])
       : java.util.List[java.util.Map[String, java.util.List[IAnnotation]]] = {
-    lightModel.fullAnnotateJava(pathToImages)
+    if (texts.isEmpty) {
+      lightModel.fullAnnotateJava(pathToImages)
+    } else lightModel.fullAnnotateImageJava(pathToImages, texts)
+
   }
 
   def fullAnnotateSingleAudioJava(

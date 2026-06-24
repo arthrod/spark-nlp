@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 John Snow Labs
+ *   Copyright 2017-2025 John Snow Labs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
  */
 package com.johnsnowlabs.reader
 
-import com.johnsnowlabs.tags.FastTest
-import org.apache.spark.sql.functions.col
+import com.johnsnowlabs.reader.util.AssertReaders
+import com.johnsnowlabs.tags.{FastTest, SlowTest}
+import org.apache.spark.sql.functions.{col, explode}
 import org.scalatest.flatspec.AnyFlatSpec
 
 class HTMLReaderTest extends AnyFlatSpec {
@@ -25,32 +26,344 @@ class HTMLReaderTest extends AnyFlatSpec {
 
   it should "read html as dataframe" taggedAs FastTest in {
     val HTMLReader = new HTMLReader()
-    val result = HTMLReader.read(htmlFilesDirectory)
-    result.show()
+    val htmlDF = HTMLReader.read(htmlFilesDirectory)
+
+    assert(!htmlDF.select(col("html").getItem(0)).isEmpty)
+    assert(!htmlDF.columns.contains("content"))
   }
 
   it should "read html as dataframe with params" taggedAs FastTest in {
     val HTMLReader = new HTMLReader(titleFontSize = 12)
     val htmlDF = HTMLReader.read(htmlFilesDirectory)
-    htmlDF.show()
 
     assert(!htmlDF.select(col("html").getItem(0)).isEmpty)
+    assert(!htmlDF.columns.contains("content"))
   }
 
-  it should "parse an html in real time" taggedAs FastTest in {
+  it should "parse an html in real time" taggedAs SlowTest in {
     val HTMLReader = new HTMLReader()
     val htmlDF = HTMLReader.read("https://www.wikipedia.org")
-    htmlDF.show()
 
     assert(!htmlDF.select(col("html").getItem(0)).isEmpty)
+    assert(!htmlDF.columns.contains("content"))
   }
 
-  it should "parse URLS in real time" taggedAs FastTest in {
+  it should "parse URLS in real time" taggedAs SlowTest in {
     val HTMLReader = new HTMLReader()
     val htmlDF = HTMLReader.read(Array("https://www.wikipedia.org", "https://example.com/"))
-    htmlDF.show()
 
     assert(!htmlDF.select(col("html").getItem(0)).isEmpty)
+    assert(!htmlDF.columns.contains("content"))
+  }
+
+  it should "store content" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader(storeContent = true)
+    val htmlDF = HTMLReader.read(htmlFilesDirectory)
+
+    assert(!htmlDF.select(col("html").getItem(0)).isEmpty)
+    assert(htmlDF.columns.contains("content"))
+  }
+
+  it should "work with headers" taggedAs FastTest in {
+    val HTMLReader =
+      new HTMLReader(headers = Map("User-Agent" -> "Mozilla/5.0", "Accept-Language" -> "es-ES"))
+    val htmlDF = HTMLReader.read("https://www.google.com")
+
+    assert(!htmlDF.select(col("html").getItem(0)).isEmpty)
+    assert(!htmlDF.columns.contains("content"))
+  }
+
+  it should "output as title for font size >= 19" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader(titleFontSize = 19)
+
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/title-test.html")
+
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TITLE)
+
+    assert(titleDF.count() == 2)
+  }
+
+  it should "output as title for font size >= 22" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader(titleFontSize = 22)
+
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/title-test.html")
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TITLE)
+
+    assert(titleDF.count() == 1)
+  }
+
+  it should "correctly parse div tags" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-div.html")
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TITLE)
+    val textDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.NARRATIVE_TEXT)
+
+    assert(titleDF.count() == 1)
+    assert(textDF.count() == 1)
+  }
+
+  it should "correctly parse bold and strong tags" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-bold-strong.html")
+
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TITLE)
+
+    assert(titleDF.count() == 2)
+  }
+
+  it should "correctly parse caption and th tags" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-caption-th.html")
+
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TABLE)
+
+    assert(titleDF.count() == 1)
+  }
+
+  it should "include title tag value in metadata" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader(includeTitleTag = true)
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-caption-th.html")
+
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TITLE)
+
+    assert(titleDF.count() == 1)
+  }
+
+  it should "output table JSON" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader(outputFormat = "json-table")
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-caption-th.html")
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TABLE)
+
+    assert(titleDF.count() == 1)
+  }
+
+  it should "output table as HTML" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader(outputFormat = "html-table")
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-caption-th.html")
+    val titleDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.TABLE)
+
+    assert(titleDF.count() == 1)
+  }
+
+  it should "read HTML files with images" taggedAs SlowTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-images.html")
+
+    val imagesDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.IMAGE)
+
+    assert(imagesDF.count() == 3)
+  }
+
+  it should "read HTML files with images inside paragraphs" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/example-image-paragraph.html")
+
+    val imagesDF = htmlDF
+      .select(explode(col("html")).as("exploded_html"))
+      .filter(col("exploded_html.elementType") === ElementType.IMAGE)
+
+    assert(imagesDF.count() == 1)
+  }
+
+  it should "produce valid element_id and parent_id relationships" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/simple-book.html")
+
+    AssertReaders.assertHierarchy(htmlDF, "html")
+  }
+
+  it should "include domPath and orderTableIndex metadata fields for tables" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/sample_tables.html")
+
+    val explodedDf = htmlDF.withColumn("html_exploded", explode(col("html")))
+    val tablesDf = explodedDf.filter(col("html_exploded.elementType") === ElementType.TABLE)
+
+    assert(tablesDf.count() > 0, "No TABLE elements found in HTMLReader output")
+
+    val tableMetaDf = tablesDf.selectExpr(
+      "html_exploded.metadata.domPath as domPath",
+      "html_exploded.metadata.orderTableIndex as orderTableIndex")
+
+    assert(
+      tableMetaDf.filter(col("domPath").isNotNull).count() == tableMetaDf.count(),
+      "Missing domPath in TABLE metadata")
+    assert(
+      tableMetaDf.filter(col("orderTableIndex").isNotNull).count() == tableMetaDf.count(),
+      "Missing orderTableIndex in TABLE metadata")
+  }
+
+  it should "include domPath and orderImageIndex metadata fields for images" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/sample_images.html")
+
+    val explodedDf = htmlDF.withColumn("html_exploded", explode(col("html")))
+    val imagesDf = explodedDf.filter(col("html_exploded.elementType") === ElementType.IMAGE)
+
+    assert(imagesDf.count() > 0, "No IMAGE elements found in HTMLReader output")
+
+    val imageMetaDf = imagesDf.selectExpr(
+      "html_exploded.metadata.domPath as domPath",
+      "html_exploded.metadata.orderImageIndex as orderImageIndex")
+
+    assert(
+      imageMetaDf.filter(col("domPath").isNotNull).count() == imageMetaDf.count(),
+      "Missing domPath in IMAGE metadata")
+    assert(
+      imageMetaDf.filter(col("orderImageIndex").isNotNull).count() == imageMetaDf.count(),
+      "Missing orderImageIndex in IMAGE metadata")
+  }
+
+  it should "include domPath, orderTableIndex and orderImageIndex metadata fields for tables and images" taggedAs FastTest in {
+    val HTMLReader = new HTMLReader()
+    val htmlDF = HTMLReader.read(s"$htmlFilesDirectory/sample_mixed.html")
+
+    val explodedDf = htmlDF.withColumn("html_exploded", explode(col("html")))
+
+    val tablesDf = explodedDf.filter(col("html_exploded.elementType") === ElementType.TABLE)
+    assert(tablesDf.count() > 0, "No TABLE elements found in mixed HTML output")
+
+    val tableMetaDf = tablesDf.selectExpr(
+      "html_exploded.metadata.domPath as domPath",
+      "html_exploded.metadata.orderTableIndex as orderTableIndex")
+    assert(
+      tableMetaDf.filter(col("domPath").isNotNull).count() == tableMetaDf.count(),
+      "Missing domPath in TABLE metadata")
+    assert(
+      tableMetaDf.filter(col("orderTableIndex").isNotNull).count() == tableMetaDf.count(),
+      "Missing orderTableIndex in TABLE metadata")
+
+    val imagesDf = explodedDf.filter(col("html_exploded.elementType") === ElementType.IMAGE)
+    assert(imagesDf.count() > 0, "No IMAGE elements found in mixed HTML output")
+
+    val imageMetaDf = imagesDf.selectExpr(
+      "html_exploded.metadata.domPath as domPath",
+      "html_exploded.metadata.orderImageIndex as orderImageIndex")
+    assert(
+      imageMetaDf.filter(col("domPath").isNotNull).count() == imageMetaDf.count(),
+      "Missing domPath in IMAGE metadata")
+    assert(
+      imageMetaDf.filter(col("orderImageIndex").isNotNull).count() == imageMetaDf.count(),
+      "Missing orderImageIndex in IMAGE metadata")
+  }
+
+  it should "include paragraph_index and paragraph_y metadata fields for text elements" taggedAs FastTest in {
+    val htmlReader = new HTMLReader()
+    val htmlDF = htmlReader.read(s"$htmlFilesDirectory/table-image.html")
+
+    val explodedDf = htmlDF.withColumn("html_exploded", explode(col("html")))
+
+    val textDf = explodedDf.filter(
+      col("html_exploded.elementType")
+        .isin(ElementType.NARRATIVE_TEXT, ElementType.TITLE, ElementType.UNCATEGORIZED_TEXT))
+
+    assert(textDf.collect().nonEmpty, "No TEXT elements found in HTMLReader output")
+
+    val textMetaRows = textDf
+      .selectExpr(
+        "html_exploded.metadata.paragraph_index as paragraph_index",
+        "html_exploded.metadata.paragraph_y as paragraph_y",
+        "html_exploded.metadata.page_y as page_y")
+      .collect()
+
+    assert(
+      textMetaRows.forall(row => row.getAs[String]("paragraph_index") != null),
+      "Missing paragraph_index in TEXT metadata")
+    assert(
+      textMetaRows.forall(row => row.getAs[String]("paragraph_y") != null),
+      "Missing paragraph_y in TEXT metadata")
+    assert(
+      textMetaRows.forall(row => row.getAs[String]("page_y") != null),
+      "Missing page_y in TEXT metadata")
+  }
+
+  it should "include coord metadata field in {x:...,y:...} format for images" taggedAs FastTest in {
+    val htmlReader = new HTMLReader()
+    val htmlDF = htmlReader.read(s"$htmlFilesDirectory/example-image-coordinates.html")
+
+    val explodedDf = htmlDF.withColumn("html_exploded", explode(col("html")))
+    val imagesDf = explodedDf.filter(col("html_exploded.elementType") === ElementType.IMAGE)
+
+    assert(imagesDf.count() == 2, "Expected exactly two images in test HTML")
+
+    // Extract coord metadata
+    val coordDf = imagesDf.selectExpr("html_exploded.metadata.coord as coord")
+
+    // Ensure every image has a coord field
+    assert(
+      coordDf.filter(col("coord").isNotNull).count() == coordDf.count(),
+      "Missing coord field in IMAGE metadata")
+
+    // Validate format: {x:123,y:456}
+    val coordPattern = """\{x:\d+,y:\d+\}"""
+    val allMatch =
+      coordDf.collect().forall(row => row.getAs[String]("coord").matches(coordPattern))
+
+    assert(allMatch, "Some IMAGE coord fields do not match the expected {x:...,y:...} format")
+  }
+
+  it should "return fallback HTML elements when a remote URL is unreachable" taggedAs FastTest in {
+    val unreachableUrl = "http://127.0.0.1:1/unreachable"
+    val htmlReader = new HTMLReader(timeout = 1)
+    val htmlDF = htmlReader.read(Array(unreachableUrl))
+
+    val explodedDf = htmlDF.withColumn("html_exploded", explode(col("html")))
+    explodedDf.show(truncate = false)
+
+    assert(htmlDF.count() == 1, "Expected the unreachable URL row to be preserved")
+    assert(
+      explodedDf.filter(col("html_exploded.elementType") === ElementType.TITLE).count() == 1,
+      "Expected a fallback TITLE element")
+
+    val fallbackMetaDf = explodedDf.selectExpr(
+      "html_exploded.metadata.fetchFallback as fetchFallback",
+      "html_exploded.metadata.sourceUrl as sourceUrl")
+
+    assert(
+      fallbackMetaDf.filter(col("fetchFallback") === "true").count() == fallbackMetaDf.count(),
+      "Expected fallback metadata on every synthetic HTML element")
+    assert(
+      fallbackMetaDf.filter(col("sourceUrl") === unreachableUrl).count() == fallbackMetaDf
+        .count(),
+      "Expected the original URL to be preserved in fallback metadata")
+
+    val combinedContent = explodedDf
+      .selectExpr("html_exploded.content as content")
+      .collect()
+      .map(_.getAs[String]("content"))
+      .mkString(" ")
+
+    assert(
+      combinedContent.contains("Could not fetch remote HTML"),
+      "Expected the fallback content to explain the fetch failure")
+  }
+
+  it should "allow opting into fail-fast behavior for remote URL fetch failures" taggedAs FastTest in {
+    val htmlReader = new HTMLReader(timeout = 1, ignoreUrlErrors = false)
+
+    assertThrows[Exception] {
+      htmlReader.urlToHTMLElement("http://127.0.0.1:1/unreachable")
+    }
   }
 
 }

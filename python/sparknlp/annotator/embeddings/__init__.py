@@ -18,6 +18,7 @@ from sparknlp.annotator.embeddings.bert_embeddings import *
 from sparknlp.annotator.embeddings.bert_sentence_embeddings import *
 from sparknlp.annotator.embeddings.camembert_embeddings import *
 from sparknlp.annotator.embeddings.chunk_embeddings import *
+from sparknlp.annotator.embeddings.late_chunk_embeddings import *
 from sparknlp.annotator.embeddings.deberta_embeddings import *
 from sparknlp.annotator.embeddings.distil_bert_embeddings import *
 from sparknlp.annotator.embeddings.doc2vec import *
@@ -25,6 +26,8 @@ from sparknlp.annotator.embeddings.elmo_embeddings import *
 from sparknlp.annotator.embeddings.e5_embeddings import *
 from sparknlp.annotator.embeddings.instructor_embeddings import *
 from sparknlp.annotator.embeddings.longformer_embeddings import *
+from sparknlp.annotator.embeddings.minilm_embeddings import *
+from sparknlp.annotator.embeddings.modernbert_embeddings import *
 from sparknlp.annotator.embeddings.mpnet_embeddings import *
 from sparknlp.annotator.embeddings.roberta_embeddings import *
 from sparknlp.annotator.embeddings.roberta_sentence_embeddings import *
@@ -40,3 +43,6 @@ from sparknlp.annotator.embeddings.uae_embeddings import *
 from sparknlp.annotator.embeddings.mxbai_embeddings import *
 from sparknlp.annotator.embeddings.snowflake_embeddings import *
 from sparknlp.annotator.embeddings.nomic_embeddings import *
+from sparknlp.annotator.embeddings.auto_gguf_embeddings import *
+from sparknlp.annotator.embeddings.e5v_embeddings import *
+from sparknlp.annotator.embeddings.bi_encoder_multimodal_embeddings import *

@@ -17,12 +17,15 @@
 package com.johnsnowlabs.ml.ai
 
 import ai.onnxruntime.{OnnxTensor, TensorInfo}
+import breeze.linalg.DenseMatrix
 import com.johnsnowlabs.ml.onnx.{OnnxSession, OnnxWrapper}
+import com.johnsnowlabs.ml.openvino.OpenvinoWrapper
 import com.johnsnowlabs.ml.tensorflow.sign.{ModelSignatureConstants, ModelSignatureManager}
 import com.johnsnowlabs.ml.tensorflow.{TensorResources, TensorflowWrapper}
-import com.johnsnowlabs.ml.util.{LinAlg, ONNX, TensorFlow}
+import com.johnsnowlabs.ml.util.{LinAlg, ONNX, Openvino, TensorFlow}
 import com.johnsnowlabs.nlp.annotators.common._
 import com.johnsnowlabs.nlp.{Annotation, AnnotatorType}
+import org.intel.openvino.Tensor
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
@@ -42,6 +45,7 @@ import scala.collection.JavaConverters._
 private[johnsnowlabs] class BGE(
     val tensorflowWrapper: Option[TensorflowWrapper],
     val onnxWrapper: Option[OnnxWrapper],
+    val openvinoWrapper: Option[OpenvinoWrapper],
     configProtoBytes: Option[Array[Byte]] = None,
     sentenceStartTokenId: Int,
     sentenceEndTokenId: Int,
@@ -57,6 +61,7 @@ private[johnsnowlabs] class BGE(
   val detectedEngine: String =
     if (tensorflowWrapper.isDefined) TensorFlow.name
     else if (onnxWrapper.isDefined) ONNX.name
+    else if (openvinoWrapper.isDefined) Openvino.name
     else TensorFlow.name
   private val onnxSessionOptions: Map[String, String] = new OnnxSession().getSessionOptions
 
@@ -66,12 +71,17 @@ private[johnsnowlabs] class BGE(
     * @return
     *   sentence embeddings
     */
-  private def getSentenceEmbedding(batch: Seq[Array[Int]]): Array[Array[Float]] = {
+  private def getSentenceEmbedding(
+      batch: Seq[Array[Int]],
+      useCLSToken: Boolean): Array[Array[Float]] = {
     val maxSentenceLength = batch.map(pieceIds => pieceIds.length).max
     val paddedBatch = batch.map(arr => padArrayWithZeros(arr, maxSentenceLength))
     val embeddings = detectedEngine match {
       case ONNX.name =>
-        getSentenceEmbeddingFromOnnx(paddedBatch, maxSentenceLength)
+        getSentenceEmbeddingFromOnnx(paddedBatch, maxSentenceLength, useCLSToken)
+
+      case Openvino.name =>
+        getSentenceEmbeddingFromOv(paddedBatch, maxSentenceLength)
       case _ =>
         getSentenceEmbeddingFromTF(paddedBatch, maxSentenceLength)
     }
@@ -160,12 +170,55 @@ private[johnsnowlabs] class BGE(
     sentenceEmbeddingsFloatsArray
   }
 
-  private def getSentenceEmbeddingFromOnnx(
+  private def getSentenceEmbeddingFromOv(
       batch: Seq[Array[Int]],
       maxSentenceLength: Int): Array[Array[Float]] = {
 
+    val batchLength = batch.length
+    val shape = Array(batchLength, maxSentenceLength)
+    val tokenTensors =
+      new org.intel.openvino.Tensor(shape, batch.flatMap(x => x.map(xx => xx.toLong)).toArray)
+    val attentionMask = batch.map(sentence => sentence.map(x => if (x == 0L) 0L else 1L)).toArray
+
+    val maskTensors = new org.intel.openvino.Tensor(shape, attentionMask.flatten)
+
+    val segmentTensors = new Tensor(shape, Array.fill(batchLength * maxSentenceLength)(0L))
+    val inferRequest = openvinoWrapper.get.getCompiledModel().create_infer_request()
+    inferRequest.set_tensor("input_ids", tokenTensors)
+    inferRequest.set_tensor("attention_mask", maskTensors)
+    inferRequest.set_tensor("token_type_ids", segmentTensors)
+
+    inferRequest.infer()
+
+    try {
+      try {
+        val lastHiddenState = inferRequest
+          .get_tensor("last_hidden_state")
+        val shape = lastHiddenState.get_shape().map(_.toLong)
+        val flattenEmbeddings = lastHiddenState
+          .data()
+        val embeddings = LinAlg.avgPooling(flattenEmbeddings, attentionMask, shape)
+        val normalizedEmbeddings = LinAlg.l2Normalize(embeddings)
+        LinAlg.denseMatrixToArray(normalizedEmbeddings)
+
+      }
+    } catch {
+      case e: Exception =>
+        e.printStackTrace()
+        Array.empty[Float]
+        // Rethrow the exception to propagate it further
+        throw e
+    }
+
+  }
+
+  private def getSentenceEmbeddingFromOnnx(
+      batch: Seq[Array[Int]],
+      maxSentenceLength: Int,
+      useCLSToken: Boolean): Array[Array[Float]] = {
+
     val inputIds = batch.map(x => x.map(x => x.toLong)).toArray
-    val attentionMask = batch.map(sentence => sentence.map(x => if (x < 0L) 0L else 1L)).toArray
+    val attentionMask = batch.map(sentence => sentence.map(x => if (x == 0L) 0L else 1L)).toArray
 
     val (runner, env) = onnxWrapper.get.getSession(onnxSessionOptions)
 
@@ -182,27 +235,44 @@ private[johnsnowlabs] class BGE(
     // TODO:  A try without a catch or finally is equivalent to putting its body in a block; no exceptions are handled.
     try {
       val results = runner.run(inputs)
-      val lastHiddenState = results.get("last_hidden_state").get()
-      val info = lastHiddenState.getInfo.asInstanceOf[TensorInfo]
-      val shape = info.getShape
       try {
+        val lastHiddenState = results.get("last_hidden_state").get()
+        val info = lastHiddenState.getInfo.asInstanceOf[TensorInfo]
+        val shape = info.getShape
+
+        // shape is [batch_size, sequence_length, hidden_size]
+        val thirdDim = shape.last.toInt // hidden_size dimension
+        val secondDim = shape(1).toInt // sequence_length dimension
+
         val flattenEmbeddings = lastHiddenState
           .asInstanceOf[OnnxTensor]
           .getFloatBuffer
           .array()
 
-        val embeddings = LinAlg.avgPooling(flattenEmbeddings, attentionMask, shape)
-        val normalizedEmbeddings = LinAlg.l2Normalize(embeddings)
+        val normalizedEmbeddings = if (!useCLSToken) {
+          // Average pooling strategy
+          val pooledEmbeddings = LinAlg.avgPooling(flattenEmbeddings, attentionMask, shape)
+          LinAlg.l2Normalize(pooledEmbeddings)
+        } else {
+          // CLS token pooling strategy
+          val embeddings = flattenEmbeddings
+            .grouped(thirdDim)
+            .toArray
+            .grouped(secondDim)
+            .toArray
+
+          LinAlg.l2Normalize(DenseMatrix(LinAlg.clsPooling(embeddings, attentionMask): _*))
+        }
+
         LinAlg.denseMatrixToArray(normalizedEmbeddings)
-      } finally if (results != null) results.close()
+      } finally {
+        if (results != null) results.close()
+      }
     } catch {
       case e: Exception =>
-        // Handle exceptions by logging or other means.
-        e.printStackTrace()
-        Array.empty[Array[Float]] // Return an empty array or appropriate error handling
+        logger.error("Error during sentence embedding computation", e)
+        Array.empty[Array[Float]]
     } finally {
-      // Close tensors outside the try-catch to avoid repeated null checks.
-      // These resources are initialized before the try-catch, so they should be closed here.
       tokenTensors.close()
       maskTensors.close()
       segmentTensors.close()
@@ -224,7 +294,8 @@ private[johnsnowlabs] class BGE(
       sentences: Seq[Annotation],
       tokenizedSentences: Seq[WordpieceTokenizedSentence],
       batchSize: Int,
-      maxSentenceLength: Int): Seq[Annotation] = {
+      maxSentenceLength: Int,
+      useCLSToken: Boolean): Seq[Annotation] = {
 
     tokenizedSentences
       .zip(sentences)
@@ -238,7 +309,7 @@ private[johnsnowlabs] class BGE(
             .map(y => y.pieceId)
             .take(maxSentenceLength - 2) ++ Array(sentenceEndTokenId))
 
-        val sentenceEmbeddings = getSentenceEmbedding(tokens)
+        val sentenceEmbeddings = getSentenceEmbedding(tokens, useCLSToken)
 
         batch.zip(sentenceEmbeddings).map { case (sentence, vectors) =>
           Annotation(

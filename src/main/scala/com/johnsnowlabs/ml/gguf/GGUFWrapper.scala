@@ -15,15 +15,16 @@
  */
 package com.johnsnowlabs.ml.gguf
 
-import com.johnsnowlabs.nlp.llama.{LlamaModel, ModelParameters}
 import com.johnsnowlabs.nlp.util.io.ResourceHelper
+import de.kherud.llama.{LlamaModel, ModelParameters}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkFiles
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 import org.slf4j.{Logger, LoggerFactory}
 
 import java.io.File
-import java.nio.file.{Files, Paths}
+import java.nio.file.Paths
 
 class GGUFWrapper(var modelFileName: String, var modelFolder: String) extends Serializable {
 
@@ -42,7 +43,7 @@ class GGUFWrapper(var modelFileName: String, var modelFolder: String) extends Se
         val modelFilePath = SparkFiles.get(modelFileName)
 
         if (Paths.get(modelFilePath).toFile.exists()) {
-          modelParameters.setModelFilePath(modelFilePath)
+          modelParameters.setModel(modelFilePath)
           llamaModel = GGUFWrapper.withSafeGGUFModelLoader(modelParameters)
         } else
           throw new IllegalStateException(
@@ -52,16 +53,24 @@ class GGUFWrapper(var modelFileName: String, var modelFolder: String) extends Se
       llamaModel
     }
 
-  def saveToFile(file: String): Unit = {
-    val modelFilePath = SparkFiles.get(modelFileName)
-    val modelOutputPath = Paths.get(file, modelFileName)
-    Files.copy(Paths.get(modelFilePath), modelOutputPath)
+  def saveToFile(path: String): Unit = {
+    val fileSystem: FileSystem = ResourceHelper.fileSystemFromPath(path)
+
+    val modelFilePath = new Path(SparkFiles.get(modelFileName))
+    fileSystem.copyFromLocalFile(modelFilePath, new Path(path))
   }
 
   // Destructor to free the model when this object is garbage collected
-  override def finalize(): Unit = {
-    if (llamaModel != null) {
-      llamaModel.close()
+  override def finalize(): Unit = close()
+
+  /** Closes the underlying LlamaModel and frees resources. */
+  def close(): Unit = {
+    this.synchronized {
+      if (llamaModel != null) {
+        println("Closing llama.cpp model.")
+        llamaModel.close()
+        llamaModel = null
+      }
     }
   }
 
@@ -77,6 +86,7 @@ object GGUFWrapper {
       new LlamaModel(modelParameters)
     }
 
+  /** Reads the GGUF model from file during loadSavedModel. */
   def read(sparkSession: SparkSession, modelPath: String): GGUFWrapper = {
     // TODO Better Sanity Check
     val modelFile = new File(modelPath)
@@ -92,30 +102,78 @@ object GGUFWrapper {
     new GGUFWrapper(modelFile.getName, modelFile.getParent)
   }
 
-  def readModel(modelFolderPath: String, spark: SparkSession): GGUFWrapper = {
-    def findGGUFModelInFolder(folderPath: String): String = {
-      val folder = new File(folderPath)
-      if (folder.exists && folder.isDirectory) {
-        val ggufFile: String = folder.listFiles
-          .filter(_.isFile)
-          .filter(_.getName.endsWith(".gguf"))
-          .map(_.getAbsolutePath)
-          .headOption // Should only be one file
-          .getOrElse(
-            throw new IllegalArgumentException(s"Could not find GGUF model in $folderPath"))
-
-        new File(ggufFile).getAbsolutePath
-      } else {
-        throw new IllegalArgumentException(s"Path $folderPath is not a directory")
+  /** Finds the GGUF model file in the given folder, returning its absolute path.
+    *
+    * @param folderPath
+    *   Path to the folder containing the GGUF model file.
+    * @return
+    *   The absolute path to the GGUF model file.
+    */
+  def findGGUFModelInFolder(folderPath: String): String = {
+    val folder = new File(folderPath)
+    if (folder.exists && folder.isDirectory) {
+      val ggufFile: String = folder.listFiles
+        .find(f =>
+          // We only find the first file, that is not mmproj (in case this was originally a multi-modal model)
+          f.isFile && f.getName
+            .endsWith(".gguf") && !f.getName.toLowerCase().contains("mmproj")) match {
+        case Some(ggufFile) => ggufFile.getAbsolutePath
+        case None =>
+          throw new IllegalArgumentException(s"Could not find GGUF model in $folderPath")
       }
-    }
 
-    val uri = new java.net.URI(modelFolderPath.replaceAllLiterally("\\", "/"))
+      new File(ggufFile).getAbsolutePath
+    } else {
+      throw new IllegalArgumentException(s"Path $folderPath is not a directory")
+    }
+  }
+
+  /** Reads the GGUF model from the folder passed by the Spark Reader during loading of a
+    * serialized model.
+    */
+  def readModel(modelFolderPath: String, spark: SparkSession): GGUFWrapper = {
     // In case the path belongs to a different file system but doesn't have the scheme prepended (e.g. dbfs)
-    val fileSystem: FileSystem = FileSystem.get(uri, spark.sparkContext.hadoopConfiguration)
+    val fileSystem: FileSystem = ResourceHelper.fileSystemFromPath(modelFolderPath)
     val actualFolderPath = fileSystem.resolvePath(new Path(modelFolderPath)).toString
     val localFolder = ResourceHelper.copyToLocal(actualFolderPath)
     val modelFile = findGGUFModelInFolder(localFolder)
     read(spark, modelFile)
+  }
+
+  /** Closes the broadcasted GGUFWrapper model on all Spark workers and the driver, freeing up
+    * resources.
+    *
+    * We use a foreachPartition on a dummy RDD to ensure that the close method is called on each
+    * executor.
+    *
+    * @param broadcastedModel
+    *   An optional Broadcast[GGUFWrapper] instance to be closed. If None, no action is taken.
+    */
+  def closeBroadcastModel(broadcastedModel: Option[Broadcast[GGUFWrapper]]): Unit = {
+    def closeOnWorkers(): Unit = {
+      val spark = SparkSession.getActiveSession.get
+      // Get the number of executors to ensure we run a task on each one.
+      val numExecutors = spark.sparkContext.getExecutorMemoryStatus.size
+
+      // Create a dummy RDD with one partition per executor
+      val dummyRdd = spark.sparkContext.parallelize(1 to numExecutors, numExecutors)
+
+      // Run a job whose only purpose is to trigger the shutdown method on each worker
+      dummyRdd.foreachPartition { _ =>
+        broadcastedModel match {
+          case Some(broadcastModel) =>
+            broadcastModel.value.close()
+          case None => // No model to close
+        }
+      }
+    }
+
+    closeOnWorkers()
+    broadcastedModel match {
+      case Some(broadcastModel) =>
+        broadcastModel.value.close() // Close the model on the driver as well
+        broadcastModel.unpersist()
+      case None => // No model to close
+    }
   }
 }

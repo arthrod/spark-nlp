@@ -52,7 +52,7 @@ spark = SparkSession.builder
     .config("spark.kryoserializer.buffer.max", "2000m")
     .config("spark.jsl.settings.pretrained.cache_folder", "sample_data/pretrained")
     .config("spark.jsl.settings.storage.cluster_tmp_dir", "sample_data/storage")
-    .config("spark.jars.packages", "com.johnsnowlabs.nlp:spark-nlp_2.12:5.5.1")
+    .config("spark.jars.packages", "com.johnsnowlabs.nlp:spark-nlp_2.12:{{ site.sparknlp_version }}")
     .getOrCreate()
 ```
 
@@ -66,7 +66,7 @@ spark-shell \
   --conf spark.kryoserializer.buffer.max=2000M \
   --conf spark.jsl.settings.pretrained.cache_folder="sample_data/pretrained" \
   --conf spark.jsl.settings.storage.cluster_tmp_dir="sample_data/storage" \
-  --packages com.johnsnowlabs.nlp:spark-nlp_2.12:5.5.1
+  --packages com.johnsnowlabs.nlp:spark-nlp_2.12:{{ site.sparknlp_version }}
 ```
 
 **pyspark:**
@@ -79,7 +79,7 @@ pyspark \
   --conf spark.kryoserializer.buffer.max=2000M \
   --conf spark.jsl.settings.pretrained.cache_folder="sample_data/pretrained" \
   --conf spark.jsl.settings.storage.cluster_tmp_dir="sample_data/storage" \
-  --packages com.johnsnowlabs.nlp:spark-nlp_2.12:5.5.1
+  --packages com.johnsnowlabs.nlp:spark-nlp_2.12:{{ site.sparknlp_version }}
 ```
 
 **Databricks:**
@@ -95,6 +95,38 @@ spark.jsl.settings.annotator.log_folder dbfs:/PATH_TO_LOGS
 ```
 
 NOTE: If this is an existing cluster, after adding new configs or changing existing properties you need to restart it.
+
+#### Additional Configuration for Databricks
+When running Email Reader feature `sparknlp.read().email("./email-files")` on Databricks, it is necessary to include the following Spark configurations to avoid dependency conflicts:
+
+```bash
+spark.driver.userClassPathFirst true
+spark.executor.userClassPathFirst true
+```
+These configurations are required because the Databricks runtime environment includes a bundled version of the `com.sun.mail:jakarta.mail` library, which conflicts with `jakarta.activation`.
+By setting these properties, the application ensures that the user-provided libraries take precedence over those bundled in the Databricks environment, resolving the dependency conflict.
+
+#### Databricks Unity Catalog Volumes and pretrained models
+
+Databricks documents that some JVM-based operations do not support reading from or writing to Unity Catalog Volumes through standard `/Volumes/...` paths. See the official Databricks guidance here:
+
+[Databricks documentation: Work with files on Databricks](https://docs.databricks.com/aws/en/files/)
+
+Spark NLP pretrained downloads rely on JVM-side file operations for download, move, and unzip. Because of this Databricks limitation, Unity Catalog Volumes are not supported as Spark NLP download/cache targets for `spark.jsl.settings.pretrained.cache_folder`, `spark.jsl.settings.storage.cluster_tmp_dir`, or `spark.jsl.settings.annotator.log_folder`.
+
+For Databricks environments that store pretrained models on a Unity Catalog Volume, the supported workaround is to place the model artifacts on the Volume outside the Spark NLP `.pretrained()` flow and then load them directly with `.load(model_path)`.
+
+**Load a model already stored on a Unity Catalog Volume**
+
+```python
+from sparknlp.annotator import NerDLModel
+
+model_path = "/Volumes/<catalog>/<schema>/<volume>/cache_pretrained/ner_dl_en_2.4.3_2.4_1584624950746"
+
+ner_model = NerDLModel.load(model_path) \
+    .setInputCols(["sentence", "token", "embeddings"]) \
+    .setOutputCol("ner")
+```
 
 </div><div class="h3-box" markdown="1">
 

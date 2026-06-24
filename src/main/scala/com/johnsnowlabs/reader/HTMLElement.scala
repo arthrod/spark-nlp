@@ -19,6 +19,6 @@ import scala.collection.mutable
 
 case class HTMLElement(
     elementType: String,
-    elementId: Int = 0,
     content: String,
-    metadata: mutable.Map[String, String])
+    metadata: mutable.Map[String, String],
+    binaryContent: Option[Array[Byte]] = None)

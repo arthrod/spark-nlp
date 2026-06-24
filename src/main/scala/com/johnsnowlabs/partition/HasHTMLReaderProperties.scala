@@ -1,0 +1,87 @@
+/*
+ * Copyright 2017-2025 John Snow Labs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.johnsnowlabs.partition
+
+import com.johnsnowlabs.nlp.ParamsAndFeaturesWritable
+import org.apache.spark.ml.param.{BooleanParam, Param}
+import scala.collection.JavaConverters._
+
+trait HasHTMLReaderProperties extends ParamsAndFeaturesWritable {
+
+  val timeout = new Param[Int](
+    this,
+    "timeout",
+    "Timeout value in seconds for reading remote HTML resources. Applied when fetching content from URLs.")
+
+  def setTimeout(value: Int): this.type = set(timeout, value)
+
+  val headers =
+    new Param[Map[String, String]](this, "headers", "HTTP headers to include in requests")
+
+  def setHeaders(value: Map[String, String]): this.type = set(headers, value)
+
+  def setHeadersPython(headers: java.util.Map[String, String]): this.type = {
+    setHeaders(headers.asScala.toMap)
+  }
+
+  protected def getHeadersAsJava: java.util.Map[String, String] = {
+    val headersCopy = new java.util.HashMap[String, String]()
+    val rawHeaders = getOrDefault(headers.asInstanceOf[Param[Any]])
+    rawHeaders match {
+      case null =>
+      case javaHeaders: java.util.Map[_, _] =>
+        javaHeaders.asScala.foreach { case (key, value) =>
+          if (key != null && value != null) headersCopy.put(key.toString, value.toString)
+        }
+      case scalaHeaders: scala.collection.Map[_, _] =>
+        scalaHeaders.foreach { case (key, value) =>
+          if (key != null && value != null) headersCopy.put(key.toString, value.toString)
+        }
+      case other =>
+        throw new IllegalArgumentException(
+          s"headers must be a Map[String, String], but got ${other.getClass.getName}")
+    }
+    headersCopy
+  }
+
+  val includeTitleTag = new Param[Boolean](
+    this,
+    "includeTitleTag",
+    "Whether to include the title tag in the HTML output. Default is false.")
+
+  def setIncludeTitleTag(value: Boolean): this.type = set(includeTitleTag, value)
+
+  val ignoreUrlErrors: BooleanParam = new BooleanParam(
+    this,
+    "ignoreUrlErrors",
+    "When true, remote HTML fetch failures return a fallback HTML payload instead of failing.")
+
+  def setIgnoreUrlErrors(value: Boolean): this.type = set(ignoreUrlErrors, value)
+
+  val outputFormat = new Param[String](
+    this,
+    "outputFormat",
+    "Output format for the table content. Options are 'plain-text' or 'html-table'. Default is 'json-table'.")
+
+  def setOutputFormat(value: String): this.type = set(outputFormat, value)
+
+  setDefault(
+    timeout -> 0,
+    includeTitleTag -> false,
+    ignoreUrlErrors -> true,
+    headers -> Map.empty[String, String])
+
+}

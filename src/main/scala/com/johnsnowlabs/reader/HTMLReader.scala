@@ -17,38 +17,131 @@ package com.johnsnowlabs.reader
 
 import com.johnsnowlabs.nlp.util.io.ResourceHelper
 import com.johnsnowlabs.nlp.util.io.ResourceHelper.{isValidURL, validFile}
+import com.johnsnowlabs.partition.util.PartitionHelper.datasetWithTextFile
+import com.johnsnowlabs.reader.util.HTMLParser
+import com.johnsnowlabs.reader.util.HTMLParser.tableElementToJson
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 import org.jsoup.Jsoup
 import org.jsoup.nodes.{Document, Element, Node, TextNode}
 
+import java.net.SocketTimeoutException
+import java.util.UUID
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.NonFatal
 
-class HTMLReader(titleFontSize: Int = 16) extends Serializable {
+/** Class to parse and read HTML files.
+  *
+  * @param titleFontSize
+  *   Minimum font size threshold in pixels used as part of heuristic rules to detect title
+  *   elements based on formatting (e.g., bold, centered, capitalized). By default, it is set to
+  *   16.
+  * @param storeContent
+  *   Whether to include the raw file content in the output DataFrame as a separate 'content'
+  *   column, alongside the structured output. By default, it is set to false.
+  * @param timeout
+  *   Timeout value in seconds for reading remote HTML resources. Applied when fetching content
+  *   from URLs. By default, it is set to 0.
+  * @param headers
+  *   sets the necessary headers for the URL request.
+  * @param ignoreUrlErrors
+  *   When true, remote URL fetch failures return a synthetic HTML fallback instead of failing the
+  *   Spark job. By default, it is set to true.
+  *
+  * Two types of input paths are supported for the reader,
+  *
+  * htmlPath: this is a path to a directory of HTML files or a path to an HTML file E.g.
+  * "path/html/files"
+  *
+  * url: this is the URL or set of URLs of a website . E.g., "https://www.wikipedia.org"
+  *
+  * ==Example==
+  * {{{
+  * val path = "./html-files/fake-html.html"
+  * val HTMLReader = new HTMLReader()
+  * val htmlDF = HTMLReader.read(url)
+  * }}}
+  *
+  * {{{
+  * htmlDF.show()
+  * +--------------------+--------------------+
+  * |                path|                html|
+  * +--------------------+--------------------+
+  * |file:/content/htm...|[{Title, My First...|
+  * +--------------------+--------------------+
+  *
+  * htmlDf.printSchema()
+  * root
+  *  |-- path: string (nullable = true)
+  *  |-- html: array (nullable = true)
+  *  |    |-- element: struct (containsNull = true)
+  *  |    |    |-- elementType: string (nullable = true)
+  *  |    |    |-- content: string (nullable = true)
+  *  |    |    |-- metadata: map (nullable = true)
+  *  |    |    |    |-- key: string
+  *  |    |    |    |-- value: string (valueContainsNull = true)
+  * }}}
+  * For more examples please refer to this
+  * [[https://github.com/JohnSnowLabs/spark-nlp/examples/python/reader/SparkNLP_HTML_Reader_Demo.ipynb notebook]].
+  */
 
-  private val spark = ResourceHelper.spark
+class HTMLReader(
+    titleFontSize: Int = 16,
+    storeContent: Boolean = false,
+    timeout: Int = 0,
+    includeTitleTag: Boolean = false,
+    outputFormat: String = "plain-text",
+    headers: Map[String, String] = Map.empty,
+    ignoreUrlErrors: Boolean = true)
+    extends Serializable {
+
+  private lazy val spark = ResourceHelper.spark
   import spark.implicits._
 
-  def read(inputSource: String): DataFrame = {
+  private var outputColumn = "html"
 
+  def setOutputColumn(value: String): this.type = {
+    require(value.nonEmpty, "Output column name cannot be empty.")
+    outputColumn = value
+    this
+  }
+
+  def getOutputColumn: String = outputColumn
+
+  /** @param inputSource
+    *   this is the link to the URL E.g. www.wikipedia.com
+    *
+    * @return
+    *   Dataframe with parsed URL content.
+    */
+
+  def read(inputSource: String): DataFrame = {
     ResourceHelper match {
       case _ if validFile(inputSource) && !inputSource.startsWith("http") =>
-        spark.sparkContext
-          .wholeTextFiles(inputSource)
-          .toDF("path", "content")
-          .withColumn("html", parseHtmlUDF(col("content")))
-
+        val htmlDf = datasetWithTextFile(spark, inputSource)
+          .withColumn(outputColumn, parseHtmlUDF(col("content")))
+        if (storeContent) htmlDf.select("path", "content", outputColumn)
+        else htmlDf.select("path", outputColumn)
       case _ if isValidURL(inputSource) =>
-        spark
+        val htmlDf = spark
           .createDataset(Seq(inputSource))
           .toDF("url")
-          .withColumn("html", parseURLUDF(col("url")))
+          .withColumn(outputColumn, parseURLUDF(col("url")))
+        if (storeContent) htmlDf.select("url", "content", outputColumn)
+        else htmlDf.select("url", outputColumn)
       case _ =>
         throw new IllegalArgumentException(s"Invalid inputSource: $inputSource")
     }
   }
+
+  /** @param inputURLs
+    *   this is a list of URLs E.g. [www.wikipedia.com, www.example.com]
+    *
+    * @return
+    *   Dataframe with parsed URL content.
+    */
 
   def read(inputURLs: Array[String]): DataFrame = {
     val spark = ResourceHelper.spark
@@ -58,7 +151,7 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
     spark
       .createDataset(validURLs)
       .toDF("url")
-      .withColumn("html", parseURLUDF(col("url")))
+      .withColumn(outputColumn, parseURLUDF(col("url")))
   }
 
   private val parseHtmlUDF = udf((html: String) => {
@@ -67,21 +160,132 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
   })
 
   private val parseURLUDF = udf((url: String) => {
-    val document = Jsoup.connect(url).get()
-    startTraversalFromBody(document)
+    fetchUrlAsElements(url)
   })
 
   private def startTraversalFromBody(document: Document): Array[HTMLElement] = {
-    val body = document.body()
-    extractElements(body)
+    try {
+      val body = document.body()
+      val elements = extractElements(body)
+      val docTitle = document.title().trim
+
+      if (docTitle.nonEmpty && includeTitleTag) {
+        val titleElem = HTMLElement(
+          ElementType.TITLE,
+          content = docTitle,
+          metadata = mutable.Map.empty[String, String])
+        Array(titleElem) ++ elements
+      } else {
+        elements
+      }
+    } catch {
+      case e: Exception =>
+        Array(
+          HTMLElement(ElementType.ERROR, s"Could not parse HTML: ${e.getMessage}", mutable.Map()))
+    }
+  }
+
+  def htmlToHTMLElement(html: String): Array[HTMLElement] = {
+    val document = Jsoup.parse(html)
+    startTraversalFromBody(document)
+  }
+
+  def urlToHTMLElement(url: String): Array[HTMLElement] = {
+    fetchUrlAsElements(url)
+  }
+
+  private def fetchUrlAsElements(url: String): Array[HTMLElement] = {
+    try {
+      val document = Jsoup
+        .connect(url)
+        .headers(headers.asJava)
+        .timeout(timeout * 1000)
+        .get()
+      startTraversalFromBody(document)
+    } catch {
+      case NonFatal(e) if ignoreUrlErrors =>
+        buildUrlFallbackElements(url, e)
+    }
+  }
+
+  private def buildUrlFallbackElements(url: String, error: Throwable): Array[HTMLElement] = {
+    val fallbackDocument = Jsoup.parse(buildUrlFallbackHtml(url, error))
+    val fetchErrorMessage = compactErrorMessage(error)
+    val fallbackMetadata = mutable.Map(
+      "sourceUrl" -> url,
+      "fetchStatus" -> "failed",
+      "fetchFallback" -> "true",
+      "fetchErrorType" -> error.getClass.getSimpleName,
+      "fetchErrorMessage" -> fetchErrorMessage)
+
+    startTraversalFromBody(fallbackDocument).map { element =>
+      element.copy(metadata = fallbackMetadata.clone() ++ element.metadata)
+    }
+  }
+
+  private def buildUrlFallbackHtml(url: String, error: Throwable): String = {
+    val title =
+      if (isTimeoutError(error)) "HTML request timed out" else "HTML request failed"
+    val escapedTitle = escapeHtml(title)
+    val escapedUrl = escapeHtml(url)
+    val escapedMessage = escapeHtml(compactErrorMessage(error))
+
+    s"""<!DOCTYPE html>
+       |<html>
+       |  <head>
+       |    <title>$escapedTitle</title>
+       |  </head>
+       |  <body>
+       |    <h1>$escapedTitle</h1>
+       |    <p>Could not fetch remote HTML from $escapedUrl.</p>
+       |    <p>$escapedMessage</p>
+       |  </body>
+       |</html>""".stripMargin
+  }
+
+  private def isTimeoutError(error: Throwable): Boolean = {
+    Iterator
+      .iterate(Option(error))(_.flatMap(t => Option(t.getCause)))
+      .takeWhile(_.isDefined)
+      .exists {
+        case Some(_: SocketTimeoutException) => true
+        case Some(t) =>
+          val message = Option(t.getMessage).getOrElse("").toLowerCase
+          message.contains("timed out") || message.contains("timeout")
+        case None => false
+      }
+  }
+
+  private def compactErrorMessage(error: Throwable): String = {
+    val message = Option(error.getMessage).map(_.trim).filter(_.nonEmpty).getOrElse {
+      error.getClass.getSimpleName
+    }
+    message.replaceAll("\\s+", " ").take(500)
+  }
+
+  private def escapeHtml(text: String): String = {
+    text
+      .replace("&", "&amp;")
+      .replace("<", "&lt;")
+      .replace(">", "&gt;")
+      .replace("\"", "&quot;")
+      .replace("'", "&#39;")
   }
 
   private case class NodeMetadata(tagName: Option[String], hidden: Boolean, var visited: Boolean)
 
   private def extractElements(root: Node): Array[HTMLElement] = {
+    var sentenceIndex = 0
+    var paragraphIndex = 0
     val elements = ArrayBuffer[HTMLElement]()
     val trackingNodes = mutable.Map[Node, NodeMetadata]()
     var pageNumber = 1
+    val paragraphSpacingY = 25
+
+    // Track parent-child hierarchy
+    var currentParentId: Option[String] = None
+
+    def newUUID(): String = UUID.randomUUID().toString
 
     def isNodeHidden(node: Node): Boolean = {
       node match {
@@ -93,6 +297,35 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
           isHiddenByStyle || isHiddenByAttribute
         case _ => false
       }
+    }
+
+    case class DomPosition(path: String, localIndex: Int)
+
+    def getXPathWithIndex(elem: Element): DomPosition = {
+      if (elem == null) return DomPosition("", 0)
+
+      val tagName = elem.tagName()
+
+      if (tagName == "#root") return DomPosition("", 0)
+
+      if (elem.parent() == null || elem.parent().tagName() == "#root") {
+        return DomPosition("/" + tagName + "[1]", 1)
+      }
+
+      val sameTagSiblings = elem.parent().children().asScala.filter(_.tagName() == tagName)
+      val index = sameTagSiblings.indexOf(elem) + 1
+      val parentPos = getXPathWithIndex(elem.parent())
+
+      DomPosition(parentPos.path + "/" + tagName + s"[$index]", index)
+    }
+
+    def findNearestHeader(elem: Element): Option[String] = {
+      val validHeaderTagPattern = "h[1-6]"
+      Iterator
+        .iterate(elem.previousElementSibling())(_.previousElementSibling())
+        .takeWhile(_ != null)
+        .find(_.tagName().matches(validHeaderTagPattern))
+        .map(_.text().trim)
     }
 
     def collectTextFromNodes(nodes: List[Node]): String = {
@@ -115,7 +348,6 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
               trackingNodes(elem).visited = true
               val text = elem.ownText().trim
               if (text.nonEmpty) textBuffer += text
-              // Recursively collect text from all child nodes
               elem.childNodes().asScala.foreach(traverseAndCollect)
 
             case _ => // Ignore other node types
@@ -123,9 +355,55 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
         }
       }
 
-      // Start traversal for each node in the list
       nodes.foreach(traverseAndCollect)
       textBuffer.mkString(" ").replaceAll("\\s+", " ").trim
+    }
+
+    /** Computes metadata for an HTML element (typically an <img> tag), including DOM path and
+      * spatial coordinates extracted from inline styles.
+      *
+      * Coordinates are returned in a compact JSON-like format: "{x:...,y:...}"
+      *
+      * If no CSS positional data is found, coordinates are approximated using the element’s
+      * position in the DOM hierarchy.
+      *
+      * @param element
+      *   The Jsoup Element to extract metadata from.
+      * @param imgMetadata
+      *   The mutable metadata map being built.
+      * @return
+      *   The enriched metadata map including "coord" and DOM position info.
+      */
+    def computeDOMMetadata(
+        element: Element,
+        imgMetadata: mutable.Map[String, String]): mutable.Map[String, String] = {
+
+      val style = element.attr("style").toLowerCase
+      val domPos = getXPathWithIndex(element)
+
+      // Base DOM metadata
+      imgMetadata("domPath") = domPos.path
+      imgMetadata("orderImageIndex") = domPos.localIndex.toString
+
+      // Default coordinates
+      var xCoord: Double = domPos.localIndex.toDouble
+      var yCoord: Double = domPos.path.split("/").length.toDouble
+
+      // Extract CSS position if available (e.g., "top: 45px; left: 120px")
+      val coordPattern = """(top|left)\s*:\s*([0-9.]+)\s*px""".r
+      coordPattern.findAllMatchIn(style).foreach { m =>
+        m.group(1) match {
+          case "top" => yCoord = m.group(2).toDouble
+          case "left" => xCoord = m.group(2).toDouble
+          case _ => // ignore other properties
+        }
+      }
+
+      // Compose compact coordinate representation
+      val coordString = s"{x:${xCoord.toInt},y:${yCoord.toInt}}"
+      imgMetadata("coord") = coordString
+
+      imgMetadata
     }
 
     def traverse(node: Node, tagName: Option[String]): Unit = {
@@ -139,81 +417,264 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
           NodeMetadata(tagName = tagName, hidden = isNodeHidden(childNode), visited = false))
       }
 
-      if (trackingNodes(node).hidden) {
-        return
-      }
+      if (trackingNodes(node).visited) return
+      if (trackingNodes(node).hidden) return
 
       node match {
         case element: Element =>
           val visitedNode = trackingNodes(element).visited
           val pageMetadata: mutable.Map[String, String] =
             mutable.Map("pageNumber" -> pageNumber.toString)
+
           element.tagName() match {
             case "a" =>
+              pageMetadata("sentence") = sentenceIndex.toString
+              sentenceIndex += 1
+              pageMetadata("paragraph_index") = paragraphIndex.toString
+              pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+              pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+              paragraphIndex += 1
               val href = element.attr("href").trim
               val linkText = element.text().trim
               if (href.nonEmpty && linkText.nonEmpty && !visitedNode) {
                 trackingNodes(element).visited = true
+                pageMetadata("element_id") = newUUID()
+                currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
                 elements += HTMLElement(
                   ElementType.LINK,
-                  content = s"[$linkText]($href)",
+                  content = linkText,
                   metadata = pageMetadata)
               }
+
             case "table" =>
-              val tableText = extractNestedTableContent(element).trim
-              if (tableText.nonEmpty && !visitedNode) {
+              pageMetadata("sentence") = sentenceIndex.toString
+              sentenceIndex += 1
+              pageMetadata("paragraph_index") = paragraphIndex.toString
+              pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+              pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+              paragraphIndex += 1
+              val tableContent = outputFormat match {
+                case "plain-text" => extractNestedTableContent(element).trim
+                case "html-table" =>
+                  element
+                    .outerHtml()
+                    .replaceAll("\\n", "")
+                    .replaceAll(">\\s+<", "><")
+                    .replaceAll("^\\s+|\\s+$", "")
+                case "json-table" => tableElementToJson(element)
+                case _ => extractNestedTableContent(element).trim
+              }
+              if (tableContent.nonEmpty && !visitedNode) {
                 trackingNodes(element).visited = true
+                pageMetadata("element_id") = newUUID()
+                currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
+
+                val domPos = getXPathWithIndex(element)
+                pageMetadata("domPath") = domPos.path
+                pageMetadata("orderTableIndex") = domPos.localIndex.toString
+
+                findNearestHeader(element).foreach(h => pageMetadata("nearestHeader") = h)
+
                 elements += HTMLElement(
                   ElementType.TABLE,
-                  content = tableText,
+                  content = tableContent,
                   metadata = pageMetadata)
               }
-            case "p" =>
+
+            case "li" =>
+              pageMetadata("sentence") = sentenceIndex.toString
+              sentenceIndex += 1
+              pageMetadata("paragraph_index") = paragraphIndex.toString
+              pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+              pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+              paragraphIndex += 1
+              val itemText = element.text().trim
+              if (itemText.nonEmpty && !visitedNode) {
+                trackingNodes(element).visited = true
+                pageMetadata("element_id") = newUUID()
+                currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
+                elements += HTMLElement(
+                  ElementType.LIST_ITEM,
+                  content = itemText,
+                  metadata = pageMetadata)
+              }
+
+            case "pre" =>
+              val codeElem = element.getElementsByTag("code").first()
+              val codeText =
+                if (codeElem != null) codeElem.text().trim
+                else element.text().trim
+              if (codeText.nonEmpty && !visitedNode) {
+                pageMetadata("sentence") = sentenceIndex.toString
+                sentenceIndex += 1
+                pageMetadata("paragraph_index") = paragraphIndex.toString
+                pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+                pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+                paragraphIndex += 1
+                trackingNodes(element).visited = true
+                pageMetadata("element_id") = newUUID()
+                currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
+                elements += HTMLElement(
+                  ElementType.UNCATEGORIZED_TEXT,
+                  content = codeText,
+                  metadata = pageMetadata)
+              }
+
+            case tag if isParagraphLikeElement(element) =>
               if (!visitedNode) {
-                classifyParagraphElement(element) match {
+                val classType = classifyParagraphElement(element)
+                element.childNodes().asScala.foreach { childNode =>
+                  val tagName = getTagName(childNode)
+                  traverse(childNode, tagName)
+                }
+
+                classType match {
                   case ElementType.NARRATIVE_TEXT =>
-                    trackingNodes(element).visited = true
                     val childNodes = element.childNodes().asScala.toList
                     val aggregatedText = collectTextFromNodes(childNodes)
                     if (aggregatedText.nonEmpty) {
+                      pageMetadata("sentence") = sentenceIndex.toString
+                      sentenceIndex += 1
+                      trackingNodes(element).visited = true
+                      pageMetadata("element_id") = newUUID()
+                      pageMetadata("paragraph_index") = paragraphIndex.toString
+                      pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+                      pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+                      currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
                       elements += HTMLElement(
                         ElementType.NARRATIVE_TEXT,
                         content = aggregatedText,
                         metadata = pageMetadata)
                     }
+
                   case ElementType.TITLE =>
-                    trackingNodes(element).visited = true
                     val titleText = element.text().trim
                     if (titleText.nonEmpty) {
+                      pageMetadata("sentence") = sentenceIndex.toString
+                      sentenceIndex += 1
+                      trackingNodes(element).visited = true
+                      val titleId = newUUID()
+                      pageMetadata("element_id") = titleId
+                      pageMetadata("paragraph_index") = paragraphIndex.toString
+                      pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+                      pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
                       elements += HTMLElement(
                         ElementType.TITLE,
                         content = titleText,
                         metadata = pageMetadata)
+                      currentParentId = Some(titleId)
+                      paragraphIndex += 1
                     }
+
                   case ElementType.UNCATEGORIZED_TEXT =>
-                    trackingNodes(element).visited = true
-                    val titleText = element.text().trim
-                    if (titleText.nonEmpty) {
+                    val text = element.text().trim
+                    if (text.nonEmpty) {
+                      pageMetadata("sentence") = sentenceIndex.toString
+                      sentenceIndex += 1
+                      trackingNodes(element).visited = true
+                      pageMetadata("element_id") = newUUID()
+                      pageMetadata("paragraph_index") = paragraphIndex.toString
+                      pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+                      pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+                      currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
                       elements += HTMLElement(
                         ElementType.UNCATEGORIZED_TEXT,
-                        content = titleText,
+                        content = text,
                         metadata = pageMetadata)
+                      paragraphIndex += 1
                     }
                 }
               }
+
             case _ if isTitleElement(element) && !visitedNode =>
               trackingNodes(element).visited = true
               val titleText = element.text().trim
               if (titleText.nonEmpty) {
+                pageMetadata("sentence") = sentenceIndex.toString
+                sentenceIndex += 1
+                val titleId = newUUID()
+                pageMetadata("element_id") = titleId
+                pageMetadata("paragraph_index") = paragraphIndex.toString
+                pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+                pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+                paragraphIndex += 1
                 elements += HTMLElement(
                   ElementType.TITLE,
                   content = titleText,
                   metadata = pageMetadata)
+                currentParentId = Some(titleId)
               }
+
+            case "div"
+                if element.className().nonEmpty &&
+                  element.text().trim.nonEmpty &&
+                  !element
+                    .className()
+                    .toLowerCase
+                    .matches(
+                      ".*(container|content|section|wrapper|grid|row|col|panel|box|card|layout).*") &&
+                  !visitedNode =>
+              val divText = element.text().trim
+              if (divText.nonEmpty) {
+                pageMetadata("sentence") = sentenceIndex.toString
+                sentenceIndex += 1
+                pageMetadata("paragraph_index") = paragraphIndex.toString
+                pageMetadata("paragraph_y") = (paragraphIndex * paragraphSpacingY).toString
+                pageMetadata("page_y") = (paragraphIndex * paragraphSpacingY).toString
+                paragraphIndex += 1
+                trackingNodes(element).visited = true
+                pageMetadata("element_id") = newUUID()
+                currentParentId.foreach(pid => pageMetadata("parent_id") = pid)
+                elements += HTMLElement(
+                  ElementType.NARRATIVE_TEXT, // or UNCATEGORIZED_TEXT if you prefer
+                  content = divText,
+                  metadata = pageMetadata)
+              }
+
             case "hr" =>
               if (element.attr("style").toLowerCase.contains("page-break")) {
                 pageNumber = pageNumber + 1
               }
+
+            case "img" =>
+              pageMetadata("sentence") = sentenceIndex.toString
+              sentenceIndex += 1
+              val src = element.attr("src").trim
+              val alt = element.attr("alt").trim
+              if (src.nonEmpty && !visitedNode) {
+                trackingNodes(element).visited = true
+                val isBase64 = src.toLowerCase.contains("base64")
+                val width = element.attr("width").trim
+                val height = element.attr("height").trim
+
+                val imgMetadata = mutable.Map[String, String]("alt" -> alt) ++ pageMetadata
+                var contentValue = src
+                if (isBase64) {
+                  val commaIndex = src.indexOf(',')
+                  if (commaIndex > 0) {
+                    val header = src.substring(0, commaIndex)
+                    val base64Payload = src.substring(commaIndex + 1)
+                    imgMetadata("encoding") = header
+                    contentValue = base64Payload
+                  }
+                }
+                if (width.nonEmpty) imgMetadata("width") = width
+                if (height.nonEmpty) imgMetadata("height") = height
+                imgMetadata("element_id") = newUUID()
+                currentParentId.foreach(pid => imgMetadata("parent_id") = pid)
+
+                val domMetadata = computeDOMMetadata(element, imgMetadata)
+                imgMetadata ++= domMetadata
+
+                // Preserve nearest header if any
+                findNearestHeader(element).foreach(h => imgMetadata("nearestHeader") = h)
+
+                elements += HTMLElement(
+                  ElementType.IMAGE,
+                  content = contentValue,
+                  metadata = imgMetadata)
+              }
+
             case _ =>
               element.childNodes().asScala.foreach { childNode =>
                 val tagName = getTagName(childNode)
@@ -224,10 +685,59 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
       }
     }
 
-    // Start traversal from the root node
     val tagName = getTagName(root)
     traverse(root, tagName)
     elements.toArray
+  }
+
+  private def isParagraphLikeElement(elem: Element): Boolean = {
+    val tag = elem.tagName().toLowerCase
+    val style = elem.attr("style").toLowerCase
+    val classAttr = elem.className().toLowerCase
+
+    if (tag == "div") {
+      // Heuristic 1: Detect visual formatting like a paragraph
+      val looksLikeParagraph =
+        style.contains("font-size") ||
+          style.contains("line-height") ||
+          style.contains("margin") ||
+          elem.getElementsByTag("b").size() > 0 ||
+          elem.getElementsByTag("strong").size() > 0
+
+      // Heuristic 2: Exclude containers that contain multiple block-level children
+      val blockChildren = elem
+        .children()
+        .asScala
+        .count(child =>
+          Set(
+            "div",
+            "p",
+            "table",
+            "ul",
+            "ol",
+            "li",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "section",
+            "article",
+            "nav").contains(child.tagName().toLowerCase))
+
+      val hasMultipleBlocks = blockChildren > 0 || elem.childrenSize() > 1
+
+      // Heuristic 3: Exclude layout-looking classes (generic keywords)
+      val layoutLike =
+        classAttr.matches(
+          ".*(section|content|container|wrapper|grid|row|col|card|block|item|panel|box).*")
+
+      // Paragraph-like only if visually looks like text, not a layout container, and no block-level children
+      looksLikeParagraph && !hasMultipleBlocks && !layoutLike
+    } else {
+      tag == "p"
+    }
   }
 
   private def getTagName(node: Node): Option[String] = {
@@ -238,7 +748,7 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
   }
 
   private def classifyParagraphElement(element: Element): String = {
-    if (isTitleElement(element)) {
+    if (isFormattedAsTitle(element)) {
       ElementType.TITLE
     } else if (isTextElement(element)) {
       ElementType.NARRATIVE_TEXT
@@ -247,38 +757,25 @@ class HTMLReader(titleFontSize: Int = 16) extends Serializable {
     }
   }
 
-  private def isTextElement(elem: Element): Boolean = {
-    !isFormattedAsTitle(elem) &&
-    (elem.attr("style").toLowerCase.contains("text") || elem.tagName().toLowerCase == "p")
+  private def isTitleElement(element: Element): Boolean = {
+    val tag = element.tagName().toLowerCase
+    val style = element.attr("style").toLowerCase
+    val role = element.attr("role").toLowerCase
+    HTMLParser.isTitleElement(tag, style, role, titleFontSize)
   }
 
-  private def isTitleElement(elem: Element): Boolean = {
-    val tag = elem.tagName().toLowerCase
-
-    // Recognize titles from common title-related tags or formatted <p> elements
-    tag match {
-      case "title" | "h1" | "h2" | "h3" | "header" => true
-      case "p" => isFormattedAsTitle(elem) // Check if <p> behaves like a title
-      case _ => elem.attr("role").toLowerCase == "heading" // ARIA role="heading"
-    }
+  private def isTextElement(elem: Element): Boolean = {
+    !isFormattedAsTitle(elem) &&
+    (elem.attr("style").toLowerCase.contains("text") ||
+      elem.tagName().toLowerCase == "p" ||
+      (elem.tagName().toLowerCase == "div" && isParagraphLikeElement(elem)))
   }
 
   private def isFormattedAsTitle(elem: Element): Boolean = {
-    // Check for bold text, large font size, or centered alignment
     val style = elem.attr("style").toLowerCase
-    val isBold = style.contains("font-weight:bold")
-    val isLargeFont = style.contains("font-size") && extractFontSize(style) >= titleFontSize
-    val isCentered = style.contains("text-align:center")
-
-    isBold || isLargeFont || (isCentered && isBold) || (isCentered && isLargeFont)
-  }
-
-  private def extractFontSize(style: String): Int = {
-    val sizePattern = """font-size:(\d+)pt""".r
-    sizePattern.findFirstMatchIn(style) match {
-      case Some(m) => m.group(1).toInt
-      case None => 0
-    }
+    val hasBoldTag =
+      elem.getElementsByTag("b").size() > 0 || elem.getElementsByTag("strong").size() > 0
+    hasBoldTag || HTMLParser.isFormattedAsTitle(style, titleFontSize)
   }
 
   private def extractNestedTableContent(elem: Element): String = {

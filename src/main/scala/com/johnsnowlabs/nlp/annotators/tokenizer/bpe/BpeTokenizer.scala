@@ -297,15 +297,16 @@ private[nlp] abstract class BpeTokenizer(
   def encode(indToken: IndexedToken): Array[TokenPiece] = {
     if (!specialTokens.contains(indToken.token))
       bpe(indToken)
-    else
+    else {
       Array(
         TokenPiece(
           indToken.token,
           indToken.token,
           vocab(indToken.token),
-          isWordStart = true,
+          isWordStart = false,
           indToken.begin,
           indToken.end))
+    }
   }
 
   def encode(indTokens: Array[IndexedToken]): Array[TokenPiece] = indTokens.flatMap(encode(_))
@@ -319,7 +320,8 @@ object BpeTokenizer {
       padWithSequenceTokens: Boolean = false,
       addPrefixSpaceToSentence: Boolean = false,
       specialTokens: Option[SpecialTokens] = None,
-      alwaysAddPrefix: Boolean = true): BpeTokenizer = {
+      alwaysAddPrefix: Boolean = true,
+      prependString: String = ""): BpeTokenizer = {
 
     def modelSpecialTokens() = specialTokens match {
       case Some(specialTok) => specialTok
@@ -352,6 +354,13 @@ object BpeTokenizer {
           modelSpecialTokens(),
           padWithSequenceTokens,
           addPrefixSpaceToSentence = addPrefixSpaceToSentence)
+      case "olmo" =>
+        new OLMoTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence)
       case "clip" =>
         new CLIPTokenizer(merges, vocab, modelSpecialTokens())
       case "phi2" =>
@@ -377,6 +386,95 @@ object BpeTokenizer {
           addPrefixSpaceToSentence = addPrefixSpaceToSentence)
       case "llama3" =>
         new LLAMA3Tokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence)
+      case "Janus" =>
+        new JanusTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          alwaysAddPrefix = alwaysAddPrefix,
+          prependString = prependString)
+      case "mllama" =>
+        new MLLamaTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence)
+      case "qwen2vl" =>
+        new Qwen2VLTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          prependString = prependString)
+      case "llava" =>
+        new LLAVATokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          prependString = prependString)
+      case "phi3v" =>
+        new Phi3VisionTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          alwaysAddPrefix = alwaysAddPrefix,
+          prependString = prependString)
+      case "smolvlm" =>
+        new SmolVLMTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          prependString = prependString)
+      case "paligemma" =>
+        new PaliGemmaTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          alwaysAddPrefix = alwaysAddPrefix,
+          prependString = prependString)
+      case "gemma3" =>
+        new Gemma3Tokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          alwaysAddPrefix = alwaysAddPrefix)
+      case "internvl" =>
+        new InternVLTokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence)
+      case "florence2" =>
+        new Florence2Tokenizer(
+          merges,
+          vocab,
+          modelSpecialTokens(),
+          padWithSequenceTokens,
+          addPrefixSpaceToSentence = addPrefixSpaceToSentence,
+          alwaysAddPrefix = alwaysAddPrefix,
+          prependString = prependString)
+      case "phi4" =>
+        new Phi4Tokenizer(
           merges,
           vocab,
           modelSpecialTokens(),

@@ -27,12 +27,9 @@ class SparkNLPTestHTMLRealTimeSpec(unittest.TestCase):
 
     def runTest(self):
         html_df = sparknlp.read().html("https://www.wikipedia.org")
-        html_df.show()
         assert html_df.select("html").count() > 0
-
         params = {"titleFontSize": "12"}
         html_params_df = sparknlp.read(params).html("https://www.wikipedia.org")
-        html_params_df.show()
 
         self.assertTrue(html_params_df.select("html").count() > 0)
 
@@ -42,11 +39,11 @@ class SparkNLPTestHTMLFilesSpec(unittest.TestCase):
 
     def setUp(self):
         self.data = SparkContextForTest.data
+        self.html_file = f"file:///{os.getcwd()}/../src/test/resources/reader/html/fake-html.html"
 
     def runTest(self):
-        html_file = "file:///" + os.getcwd() + "/../src/test/resources/reader/html/fake-html.html"
-        html_df = sparknlp.read().html(html_file)
-        html_df.show()
+        html_df = sparknlp.read().html(self.html_file)
+
         self.assertTrue(html_df.select("html").count() > 0)
 
 
@@ -60,3 +57,113 @@ class SparkNLPTestHTMLValidationSpec(unittest.TestCase):
         with pytest.raises(TypeError, match="htmlPath must be a string or a list of strings"):
             sparknlp.read().html(123)
 
+
+@pytest.mark.fast
+class SparkNLPTestEmailFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.email_file = f"file:///{os.getcwd()}/../src/test/resources/reader/email/test-several-attachments.eml"
+
+    def runTest(self):
+        email_df = sparknlp.read().email(self.email_file)
+
+        self.assertTrue(email_df.select("email").count() > 0)
+
+@pytest.mark.fast
+class SparkNLPTestWordFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.word_file = f"file:///{os.getcwd()}/../src/test/resources/reader/doc/contains-pictures.docx"
+
+    def runTest(self):
+        word_df = sparknlp.read().doc(self.word_file)
+
+        self.assertTrue(word_df.select("doc").count() > 0)
+
+@pytest.mark.fast
+class SparkNLPTestExcelFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.excel_file = f"file:///{os.getcwd()}/../src/test/resources/reader/xls/vodafone.xlsx"
+
+    def runTest(self):
+        excel_df = sparknlp.read().xls(self.excel_file)
+
+        self.assertTrue(excel_df.select("xls").count() > 0)
+
+@pytest.mark.fast
+class SparkNLPTestPowerPointFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.ppt_file = f"file:///{os.getcwd()}/../src/test/resources/reader/ppt"
+
+    def runTest(self):
+        ppt_df = sparknlp.read().ppt(self.ppt_file)
+
+        self.assertTrue(ppt_df.select("ppt").count() > 0)
+
+@pytest.mark.fast
+class SparkNLPTestTXTFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.txt_file = f"file:///{os.getcwd()}/../src/test/resources/reader/txt/simple-text.txt"
+
+    def runTest(self):
+        txt_df = sparknlp.read().txt(self.txt_file)
+
+        self.assertTrue(txt_df.select("txt").count() > 0)
+
+
+@pytest.mark.fast
+class SparkNLPTestXMLFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.xml_files = f"file:///{os.getcwd()}/../src/test/resources/reader/xml"
+
+    def runTest(self):
+        xml_df = sparknlp.read().xml(self.xml_files)
+
+        self.assertTrue(xml_df.select("xml").count() > 0)
+
+@pytest.mark.fast
+class SparkNLPTestMdFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.md_file = f"file:///{os.getcwd()}/../src/test/resources/reader/md/simple.md"
+
+    def runTest(self):
+        md_df = sparknlp.read().md(self.md_file)
+
+        self.assertTrue(md_df.select("md").count() > 0)
+
+
+@pytest.mark.fast
+class SparkNLPTestCSVFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.csv_files = f"file:///{os.getcwd()}/../src/test/resources/reader/csv/stanley-cups.csv"
+
+    def runTest(self):
+        csv_df = sparknlp.read().csv(self.csv_files)
+
+        self.assertTrue(csv_df.select("csv").count() > 0)
+
+@pytest.mark.fast
+class SparkNLPTestPDFFilesSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.data = SparkContextForTest.data
+        self.pdf_file = f"file:///{os.getcwd()}/../src/test/resources/reader/pdf/pdf-title.pdf"
+
+    def runTest(self):
+        csv_df = sparknlp.read().pdf(self.pdf_file)
+
+        self.assertTrue(csv_df.select("pdf").count() > 0)

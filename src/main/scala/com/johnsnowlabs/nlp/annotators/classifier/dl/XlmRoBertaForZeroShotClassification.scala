@@ -18,6 +18,7 @@ package com.johnsnowlabs.nlp.annotators.classifier.dl
 
 import com.johnsnowlabs.ml.ai.XlmRoBertaClassification
 import com.johnsnowlabs.ml.onnx.{OnnxWrapper, ReadOnnxModel, WriteOnnxModel}
+import com.johnsnowlabs.ml.openvino.{OpenvinoWrapper, ReadOpenvinoModel, WriteOpenvinoModel}
 import com.johnsnowlabs.ml.tensorflow._
 import com.johnsnowlabs.ml.tensorflow.sentencepiece.{
   ReadSentencePieceModel,
@@ -30,7 +31,7 @@ import com.johnsnowlabs.ml.util.LoadExternalModel.{
   modelSanityCheck,
   notSupportedEngineError
 }
-import com.johnsnowlabs.ml.util.{ONNX, TensorFlow}
+import com.johnsnowlabs.ml.util.{ONNX, Openvino, TensorFlow}
 import com.johnsnowlabs.nlp._
 import com.johnsnowlabs.nlp.annotators.common._
 import com.johnsnowlabs.nlp.serialization.MapFeature
@@ -132,6 +133,7 @@ class XlmRoBertaForZeroShotClassification(override val uid: String)
     with HasBatchedAnnotate[XlmRoBertaForZeroShotClassification]
     with WriteTensorflowModel
     with WriteOnnxModel
+    with WriteOpenvinoModel
     with WriteSentencePieceModel
     with HasCaseSensitiveProperties
     with HasClassifierActivationProperties
@@ -254,6 +256,7 @@ class XlmRoBertaForZeroShotClassification(override val uid: String)
       spark: SparkSession,
       tensorflowWrapper: Option[TensorflowWrapper],
       onnxWrapper: Option[OnnxWrapper],
+      openvinoWrapper: Option[OpenvinoWrapper],
       spp: SentencePieceWrapper): XlmRoBertaForZeroShotClassification = {
     if (_model.isEmpty) {
       _model = Some(
@@ -261,6 +264,7 @@ class XlmRoBertaForZeroShotClassification(override val uid: String)
           new XlmRoBertaClassification(
             tensorflowWrapper,
             onnxWrapper,
+            openvinoWrapper,
             spp,
             configProtoBytes = getConfigProtoBytes,
             tags = $$(labels),
@@ -341,13 +345,21 @@ class XlmRoBertaForZeroShotClassification(override val uid: String)
           "_xlmroberta_classification",
           XlmRoBertaForZeroShotClassification.onnxFile)
 
-        writeSentencePieceModel(
+      case Openvino.name =>
+        writeOpenvinoModel(
           path,
           spark,
-          getModelIfNotSet.spp,
-          "_xlmroberta",
-          XlmRoBertaForZeroShotClassification.sppFile)
+          getModelIfNotSet.openvinoWrapper.get,
+          "openvino_model.xml",
+          XlmRoBertaForZeroShotClassification.openvinoFile)
+
     }
+    writeSentencePieceModel(
+      path,
+      spark,
+      getModelIfNotSet.spp,
+      "_xlmroberta",
+      XlmRoBertaForZeroShotClassification.sppFile)
 
   }
 }
@@ -377,12 +389,14 @@ trait ReadablePretrainedXlmRoBertaForZeroShotModel
 trait ReadXlmRoBertaForZeroShotDLModel
     extends ReadTensorflowModel
     with ReadSentencePieceModel
-    with ReadOnnxModel {
+    with ReadOnnxModel
+    with ReadOpenvinoModel {
   this: ParamsAndFeaturesReadable[XlmRoBertaForZeroShotClassification] =>
 
   override val tfFile: String = "xlmroberta_classification_tensorflow"
   override val sppFile: String = "xlmroberta_spp"
   override val onnxFile: String = "xlmroberta_classification_onnx"
+  override val openvinoFile: String = "xlmroberta_classification_openvino"
 
   def readModel(
       instance: XlmRoBertaForZeroShotClassification,
@@ -394,7 +408,7 @@ trait ReadXlmRoBertaForZeroShotDLModel
       case TensorFlow.name =>
         val tf =
           readTensorflowModel(path, spark, "_xlmroberta_classification_tf", initAllTables = false)
-        instance.setModelIfNotSet(spark, Some(tf), None, spp)
+        instance.setModelIfNotSet(spark, Some(tf), None, None, spp)
       case ONNX.name =>
         val onnxWrapper =
           readOnnxModel(
@@ -404,7 +418,12 @@ trait ReadXlmRoBertaForZeroShotDLModel
             zipped = true,
             useBundle = false,
             None)
-        instance.setModelIfNotSet(spark, None, Some(onnxWrapper), spp)
+        instance.setModelIfNotSet(spark, None, Some(onnxWrapper), None, spp)
+
+      case Openvino.name =>
+        val openvinoWrapper =
+          readOpenvinoModel(path, spark, "_xlmroberta_classification_openvino")
+        instance.setModelIfNotSet(spark, None, None, Some(openvinoWrapper), spp)
 
     }
   }
@@ -462,12 +481,24 @@ trait ReadXlmRoBertaForZeroShotDLModel
           */
         annotatorModel
           .setSignatures(_signatures)
-          .setModelIfNotSet(spark, Some(wrapper), None, spModel)
+          .setModelIfNotSet(spark, Some(wrapper), None, None, spModel)
       case ONNX.name =>
         val onnxWrapper =
           OnnxWrapper.read(spark, localModelPath, zipped = false, useBundle = true)
         annotatorModel
-          .setModelIfNotSet(spark, None, Some(onnxWrapper), spModel)
+          .setModelIfNotSet(spark, None, Some(onnxWrapper), None, spModel)
+
+      case Openvino.name =>
+        val ovWrapper: OpenvinoWrapper =
+          OpenvinoWrapper.read(
+            spark,
+            localModelPath,
+            zipped = false,
+            useBundle = true,
+            detectedEngine = detectedEngine)
+        annotatorModel
+          .setModelIfNotSet(spark, None, None, Some(ovWrapper), spModel)
+
       case _ =>
         throw new Exception(notSupportedEngineError)
     }

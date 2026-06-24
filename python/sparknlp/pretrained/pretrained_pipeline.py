@@ -60,7 +60,7 @@ class PretrainedPipeline:
     def from_disk(path, parse_embeddings=False):
         return PretrainedPipeline(None, None, None, parse_embeddings, path)
 
-    def annotate(self, target, column=None):
+    def annotate(self, *args, **kwargs):
         """Annotates the data provided, extracting the results.
 
         The data should be either a list or a str.
@@ -85,11 +85,20 @@ class PretrainedPipeline:
         >>> result["ner"]
         ['B-ORG', 'O', 'O', 'B-PER', 'O', 'O', 'B-LOC', 'O']
         """
+        metadata = kwargs.pop("metadata", None)
 
-        annotations = self.light_model.annotate(target)
+        if "target" in kwargs:
+            args = (kwargs["target"],) + args
+        if "optional_target" in kwargs:
+            args = args + (kwargs["optional_target"],)
+
+        if metadata is not None:
+            annotations = self.light_model.annotate(*args, metadata=metadata)
+        else:
+            annotations = self.light_model.annotate(*args)
         return annotations
 
-    def fullAnnotate(self, target, optional_target=""):
+    def fullAnnotate(self, *args, **kwargs):
         """Annotates the data provided into `Annotation` type results.
 
         The data should be either a list or a str.
@@ -121,7 +130,17 @@ class PretrainedPipeline:
         Annotation(named_entity, 30, 36, B-LOC, {'word': 'Baghdad'}),
         Annotation(named_entity, 37, 37, O, {'word': '.'})]
         """
-        annotations = self.light_model.fullAnnotate(target, optional_target)
+        metadata = kwargs.pop("metadata", None)
+
+        if "target" in kwargs:
+            args = (kwargs["target"],) + args
+        if "optional_target" in kwargs:
+            args = args + (kwargs["optional_target"],)
+
+        if metadata is not None:
+            annotations = self.light_model.fullAnnotate(*args, metadata=metadata)
+        else:
+            annotations = self.light_model.fullAnnotate(*args)
         return annotations
 
     def fullAnnotateImage(self, path_to_image):

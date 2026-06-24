@@ -1,15 +1,14 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>sparknlp.common.annotator_type &#8212; Spark NLP 5.5.1 documentation</title>
+    <title>sparknlp.common.annotator_type &#8212; Spark NLP 6.4.2 documentation</title>
   
   
   
@@ -19,33 +18,31 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../../static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../../../../static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../../../../static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../../../../static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../../../static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../../../static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../../../../../static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../../../../static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../../../static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../../static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../../static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../../static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../../../static/css/custom.css?v=e1fb877f" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../../static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../../../../static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../../../../static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../../../static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../../../static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../static/documentation_options.js"></script>
-    <script src="../../../../../static/jquery.js"></script>
-    <script src="../../../../../static/underscore.js"></script>
-    <script src="../../../../../static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../../../static/doctools.js"></script>
-    <script src="../../../../../static/sphinx_highlight.js"></script>
-    <script src="../../../../../static/toggleprompt.js"></script>
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../static/documentation_options.js?v=bf4b7637"></script>
+    <script src="../../../../../static/doctools.js?v=888ff710"></script>
+    <script src="../../../../../static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../../../static/toggleprompt.js?v=670350bf"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'reference/autosummary/sparknlp/common/annotator_type/index';</script>
-    <link rel="shortcut icon" href="../../../../../static/fav.ico"/>
+    <link rel="icon" href="../../../../../static/fav.ico"/>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -58,6 +55,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -98,9 +104,11 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../../../../../index.html">
@@ -108,25 +116,26 @@
   
   
   
+  
     
     
       
     
     
-    <img src="../../../../../static/logo.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../../../../../static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../../../../../static/logo.png" class="logo__image only-light" alt="Spark NLP 6.4.2 documentation - Home"/>
+    <script>document.write(`<img src="../../../../../static/logo.png" class="logo__image only-dark" alt="Spark NLP 6.4.2 documentation - Home"/>`);</script>
   
   
 </a></div>
     
   </div>
   
-  
   <div class="col-lg-9 navbar-header-items">
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -172,23 +181,27 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
         <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -199,18 +212,21 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -221,7 +237,7 @@ document.write(`
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
       
-      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+      <div class="bd-sidebar-primary bd-sidebar">
         
 
   
@@ -230,7 +246,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -276,12 +293,13 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -289,6 +307,29 @@ document.write(`
       </div>
     
   </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../annotator_approach/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_approach</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotator_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_model</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../annotator_properties/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_properties</span></code></a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_type</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../completion_post_processing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.completion_post_processing</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coverage_result/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.coverage_result</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match_strategy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.match_strategy</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../properties/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.properties</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../read_as/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.read_as</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../recursive_annotator_approach/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.recursive_annotator_approach</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../storage/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.storage</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.utils</span></code></a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
   
   
   <div class="sidebar-primary-items__end sidebar-primary__section">
@@ -314,15 +355,15 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../../../../index.html" class="nav-link" aria-label="Home">
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_type</span></code></li>
+    <li class="breadcrumb-item active" aria-current="page"><code...</li>
   </ul>
 </nav>
 </div>
@@ -341,6 +382,139 @@ document.write(`
                   
   <section id="module-sparknlp.common.annotator_type">
 <span id="sparknlp-common-annotator-type"></span><h1><a class="reference internal" href="#module-sparknlp.common.annotator_type" title="sparknlp.common.annotator_type"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_type</span></code></a><a class="headerlink" href="#module-sparknlp.common.annotator_type" title="Permalink to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#sparknlp.common.annotator_type.AnnotatorType" title="sparknlp.common.annotator_type.AnnotatorType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AnnotatorType</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnnotatorType</span></span><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType" title="Permalink to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.AUDIO">
+<span class="sig-name descname"><span class="pre">AUDIO</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'audio'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.AUDIO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.AUDIO" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.DOCUMENT">
+<span class="sig-name descname"><span class="pre">DOCUMENT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'document'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.DOCUMENT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.DOCUMENT" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.IMAGE">
+<span class="sig-name descname"><span class="pre">IMAGE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'image'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.IMAGE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.IMAGE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.TOKEN">
+<span class="sig-name descname"><span class="pre">TOKEN</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'token'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.TOKEN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.TOKEN" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.WORDPIECE">
+<span class="sig-name descname"><span class="pre">WORDPIECE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'wordpiece'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.WORDPIECE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.WORDPIECE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.WORD_EMBEDDINGS">
+<span class="sig-name descname"><span class="pre">WORD_EMBEDDINGS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'word_embeddings'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.WORD_EMBEDDINGS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.WORD_EMBEDDINGS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.SENTENCE_EMBEDDINGS">
+<span class="sig-name descname"><span class="pre">SENTENCE_EMBEDDINGS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'sentence_embeddings'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.SENTENCE_EMBEDDINGS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.SENTENCE_EMBEDDINGS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.CATEGORY">
+<span class="sig-name descname"><span class="pre">CATEGORY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'category'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.CATEGORY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.CATEGORY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.DATE">
+<span class="sig-name descname"><span class="pre">DATE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'date'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.DATE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.DATE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.ENTITY">
+<span class="sig-name descname"><span class="pre">ENTITY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'entity'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.ENTITY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.ENTITY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.SENTIMENT">
+<span class="sig-name descname"><span class="pre">SENTIMENT</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'sentiment'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.SENTIMENT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.SENTIMENT" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.POS">
+<span class="sig-name descname"><span class="pre">POS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'pos'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.POS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.POS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.CHUNK">
+<span class="sig-name descname"><span class="pre">CHUNK</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'chunk'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.CHUNK"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.CHUNK" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.NAMED_ENTITY">
+<span class="sig-name descname"><span class="pre">NAMED_ENTITY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'named_entity'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.NAMED_ENTITY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.NAMED_ENTITY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.NEGEX">
+<span class="sig-name descname"><span class="pre">NEGEX</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'negex'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.NEGEX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.NEGEX" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.DEPENDENCY">
+<span class="sig-name descname"><span class="pre">DEPENDENCY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'dependency'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.DEPENDENCY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.DEPENDENCY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.LABELED_DEPENDENCY">
+<span class="sig-name descname"><span class="pre">LABELED_DEPENDENCY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'labeled_dependency'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.LABELED_DEPENDENCY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.LABELED_DEPENDENCY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.LANGUAGE">
+<span class="sig-name descname"><span class="pre">LANGUAGE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'language'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.LANGUAGE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.LANGUAGE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.NODE">
+<span class="sig-name descname"><span class="pre">NODE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'node'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.NODE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.NODE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.TABLE">
+<span class="sig-name descname"><span class="pre">TABLE</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'table'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.TABLE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.TABLE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.DUMMY">
+<span class="sig-name descname"><span class="pre">DUMMY</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'dummy'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.DUMMY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.DUMMY" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.DOC_SIMILARITY_RANKINGS">
+<span class="sig-name descname"><span class="pre">DOC_SIMILARITY_RANKINGS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'doc_similarity_rankings'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.DOC_SIMILARITY_RANKINGS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.DOC_SIMILARITY_RANKINGS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="sparknlp.common.annotator_type.AnnotatorType.BM25_RANKINGS">
+<span class="sig-name descname"><span class="pre">BM25_RANKINGS</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">'bm25_rankings'</span></em><a class="reference internal" href="../../../../../modules/sparknlp/common/annotator_type.html#AnnotatorType.BM25_RANKINGS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.common.annotator_type.AnnotatorType.BM25_RANKINGS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
 </section>
 
 
@@ -348,16 +522,12 @@ document.write(`
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -367,6 +537,49 @@ document.write(`
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
   <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType"><code class="docutils literal notranslate"><span class="pre">AnnotatorType</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.AUDIO"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.AUDIO</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.DOCUMENT"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.DOCUMENT</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.IMAGE"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.IMAGE</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.TOKEN"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.TOKEN</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.WORDPIECE"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.WORDPIECE</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.WORD_EMBEDDINGS"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.WORD_EMBEDDINGS</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.SENTENCE_EMBEDDINGS"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.SENTENCE_EMBEDDINGS</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.CATEGORY"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.CATEGORY</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.DATE"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.DATE</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.ENTITY"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.ENTITY</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.SENTIMENT"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.SENTIMENT</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.POS"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.POS</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.CHUNK"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.CHUNK</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.NAMED_ENTITY"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.NAMED_ENTITY</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.NEGEX"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.NEGEX</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.DEPENDENCY"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.DEPENDENCY</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.LABELED_DEPENDENCY"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.LABELED_DEPENDENCY</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.LANGUAGE"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.LANGUAGE</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.NODE"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.NODE</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.TABLE"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.TABLE</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.DUMMY"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.DUMMY</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.DOC_SIMILARITY_RANKINGS"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.DOC_SIMILARITY_RANKINGS</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.common.annotator_type.AnnotatorType.BM25_RANKINGS"><code class="docutils literal notranslate"><span class="pre">AnnotatorType.BM25_RANKINGS</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../../../../../_sources/reference/autosummary/sparknlp/common/annotator_type/index.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -387,8 +600,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../../../static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../../../../static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../../../../static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../../../static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -396,17 +609,19 @@ document.write(`
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, John Snow Labs.
+      © Copyright 2026 John Snow Labs.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
     <br/>
   </p>
 </div>
@@ -414,10 +629,12 @@ document.write(`
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
 </p></div>
       
     </div>

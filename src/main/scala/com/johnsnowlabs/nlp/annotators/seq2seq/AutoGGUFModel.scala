@@ -16,21 +16,21 @@
 package com.johnsnowlabs.nlp.annotators.seq2seq
 
 import com.johnsnowlabs.ml.gguf.GGUFWrapper
+import com.johnsnowlabs.ml.gguf.GGUFWrapper.findGGUFModelInFolder
 import com.johnsnowlabs.ml.util.LlamaCPP
 import com.johnsnowlabs.nlp._
-import com.johnsnowlabs.nlp.llama.LlamaModel
+import com.johnsnowlabs.nlp.llama.LlamaExtensions
 import com.johnsnowlabs.nlp.util.io.ResourceHelper
+import de.kherud.llama.{InferenceParameters, LlamaException, LlamaModel}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.ml.util.Identifiable
 import org.apache.spark.sql.SparkSession
-import org.json4s.DefaultFormats
-import org.json4s.jackson.JsonMethods
 
 /** Annotator that uses the llama.cpp library to generate text completions with large language
   * models.
   *
-  * For settable parameters, and their explanations, see [[HasLlamaCppProperties]] and refer to
-  * the llama.cpp documentation of
+  * For settable parameters, and their explanations, see [[HasLlamaCppInferenceProperties]],
+  * [[HasLlamaCppModelProperties]] and refer to the llama.cpp documentation of
   * [[https://github.com/ggerganov/llama.cpp/tree/7d5e8777ae1d21af99d4f95be10db4870720da91/examples/server server.cpp]]
   * for more information.
   *
@@ -43,7 +43,11 @@ import org.json4s.jackson.JsonMethods
   *   .setInputCols("document")
   *   .setOutputCol("completions")
   * }}}
-  * The default model is `"phi3.5_mini_4k_instruct_q4_gguf"`, if no name is provided.
+  * The default model is `"Phi_4_mini_instruct_Q4_K_M_gguf"`, if no name is provided.
+  *
+  * AutoGGUFModel is also able to load pretrained models from [[AutoGGUFVisionModel]]. Just
+  * specify the same name for the `pretrained` method, and it will load the text-part of the
+  * multimodal model automatically.
   *
   * For available pretrained models please see the [[https://sparknlp.org/models Models Hub]].
   *
@@ -118,8 +122,10 @@ class AutoGGUFModel(override val uid: String)
     extends AnnotatorModel[AutoGGUFModel]
     with HasBatchedAnnotate[AutoGGUFModel]
     with HasEngine
-    with HasLlamaCppProperties
-    with HasProtectedParams {
+    with HasLlamaCppModelProperties
+    with HasLlamaCppInferenceProperties
+    with HasProtectedParams
+    with CompletionPostProcessing {
 
   override val outputAnnotatorType: AnnotatorType = AnnotatorType.DOCUMENT
   override val inputAnnotatorTypes: Array[AnnotatorType] = Array(AnnotatorType.DOCUMENT)
@@ -131,10 +137,6 @@ class AutoGGUFModel(override val uid: String)
 
   private var _model: Option[Broadcast[GGUFWrapper]] = None
 
-  // Values for automatic GPU support
-  private val defaultGpuLayers = 1000
-  private val defaultMainGpu = 0
-
   /** @group getParam */
   def getModelIfNotSet: GGUFWrapper = _model.get.value
 
@@ -143,20 +145,34 @@ class AutoGGUFModel(override val uid: String)
     if (_model.isEmpty) {
       _model = Some(spark.sparkContext.broadcast(wrapper))
     }
-
-    // Entrypoint for models. Automatically set GPU support if detected.
-    val usingGPUJar: Boolean = spark.sparkContext.listJars.exists(_.contains("spark-nlp-gpu"))
-    if (usingGPUJar) {
-      logger.info("Using GPU jar. Offloading all layers to GPU.")
-      setMainGpu(defaultMainGpu)
-      setNGpuLayers(defaultGpuLayers)
-    }
     this
   }
 
+  /** Closes the llama.cpp model backend freeing resources. The model is reloaded when used again.
+    */
+  def close(): Unit = GGUFWrapper.closeBroadcastModel(_model)
+
   private[johnsnowlabs] def setEngine(engineName: String): this.type = set(engine, engineName)
 
-  setDefault(engine -> LlamaCPP.name)
+  setDefault(
+    engine -> LlamaCPP.name,
+    useChatTemplate -> true,
+    nCtx -> 4096,
+    nBatch -> 512,
+    nPredict -> 100,
+    nGpuLayers -> 99,
+    systemPrompt -> "You are a helpful assistant.",
+    batchSize -> 2)
+
+  /** Sets the number of parallel processes for decoding. This is an alias for `setBatchSize`.
+    *
+    * @group setParam
+    * @param nParallel
+    *   The number of parallel processes for decoding
+    */
+  def setNParallel(nParallel: Int): this.type = {
+    setBatchSize(nParallel)
+  }
 
   override def onWrite(path: String, spark: SparkSession): Unit = {
     super.onWrite(path, spark)
@@ -172,54 +188,49 @@ class AutoGGUFModel(override val uid: String)
     */
   override def batchAnnotate(batchedAnnotations: Seq[Array[Annotation]]): Seq[Seq[Annotation]] = {
     val annotations: Seq[Annotation] = batchedAnnotations.flatten
+    // TODO: group by doc and sentence
     if (annotations.nonEmpty) {
+      val annotationsText = annotations.map(_.result).toArray
 
       val modelParams =
-        getModelParameters.setNParallel(getBatchSize) // set parallel decoding to batch size
-      val inferenceParams = getInferenceParameters
+        getModelParameters.setParallel(getBatchSize) // set parallel decoding to batch size
+      val inferenceParams: InferenceParameters = getInferenceParameters
 
       val model: LlamaModel = getModelIfNotSet.getSession(modelParams)
 
-      val annotationsText = annotations.map(_.result)
-
       val (completedTexts: Array[String], metadata: Map[String, String]) =
         try {
-          (model.requestBatchCompletion(annotationsText.toArray, inferenceParams), Map.empty)
+          val results: Array[String] = LlamaExtensions.multiComplete(
+            model,
+            inferenceParams,
+            getSystemPrompt,
+            annotationsText)
+          val resultsCleaned = processCompletions(results)
+          (resultsCleaned, Map.empty)
         } catch {
-          case e: Exception =>
+          case e: LlamaException =>
             logger.error("Error in llama.cpp batch completion", e)
-            (Array[String](), Map("exception" -> e.getMessage))
+            (Array.fill(annotationsText.length)(""), Map("llamacpp_exception" -> e.getMessage))
         }
-
-      val result: Seq[Seq[Annotation]] =
-        annotations.zip(completedTexts).map { case (annotation, text) =>
-          Seq(
-            new Annotation(
-              outputAnnotatorType,
-              0,
-              text.length - 1,
-              text,
-              annotation.metadata ++ metadata))
-        }
-      result
+      annotations.zip(completedTexts).map { case (annotation, text) =>
+        Seq(
+          new Annotation(
+            outputAnnotatorType,
+            0,
+            text.length - 1,
+            text,
+            annotation.metadata ++ metadata))
+      }
     } else Seq(Seq.empty[Annotation])
-  }
-
-  def getMetadataMap: Map[String, String] = {
-    val metadataJsonString = getMetadata
-    if (metadataJsonString.isEmpty) Map.empty
-    else {
-      implicit val formats: DefaultFormats.type = DefaultFormats
-      JsonMethods.parse(metadataJsonString).extract[Map[String, String]]
-    }
   }
 }
 
 trait ReadablePretrainedAutoGGUFModel
-    extends ParamsAndFeaturesReadable[AutoGGUFModel]
+    extends ParamsAndFeaturesFallbackReadable[AutoGGUFModel]
     with HasPretrained[AutoGGUFModel] {
-  override val defaultModelName: Some[String] = Some("phi3.5_mini_4k_instruct_q4_gguf")
+  override val defaultModelName: Some[String] = Some("Phi_4_mini_instruct_Q4_K_M_gguf")
   override val defaultLang: String = "en"
+  override val skipPreferredEngine: Boolean = true
 
   /** Java compliant-overrides */
   override def pretrained(): AutoGGUFModel = super.pretrained()
@@ -234,7 +245,14 @@ trait ReadablePretrainedAutoGGUFModel
 }
 
 trait ReadAutoGGUFModel {
-  this: ParamsAndFeaturesReadable[AutoGGUFModel] =>
+  this: ParamsAndFeaturesFallbackReadable[AutoGGUFModel] =>
+
+  override def fallbackLoad(folder: String, spark: SparkSession): AutoGGUFModel = {
+    val actualFolderPath: String = ResourceHelper.resolvePath(folder)
+    val localFolder = ResourceHelper.copyToLocal(actualFolderPath)
+    val modelFile = findGGUFModelInFolder(localFolder)
+    loadSavedModel(modelFile, spark)
+  }
 
   def readModel(instance: AutoGGUFModel, path: String, spark: SparkSession): Unit = {
     val model: GGUFWrapper = GGUFWrapper.readModel(path, spark)
@@ -251,7 +269,7 @@ trait ReadAutoGGUFModel {
       .setModelIfNotSet(spark, GGUFWrapper.read(spark, localPath))
       .setEngine(LlamaCPP.name)
 
-    val metadata = LlamaModel.getMetadataFromFile(localPath)
+    val metadata = LlamaExtensions.getMetadataFromFile(localPath)
     if (metadata.nonEmpty) annotatorModel.setMetadata(metadata)
     annotatorModel
   }

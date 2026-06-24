@@ -59,7 +59,7 @@ class DistilBertEmbeddingsTestSpec extends AnyFlatSpec {
       .setStages(Array(documentAssembler, tokenizer, stopWordsCleaner, embeddings))
 
     val pipelineDF = pipeline.fit(smallCorpus).transform(smallCorpus)
-    Benchmark.time("Time to save BertEmbeddings results") {
+    Benchmark.time("Time to save DistilBertEmbeddings results") {
       pipelineDF.write.mode("overwrite").parquet("./tmp_bert_embeddings")
     }
   }

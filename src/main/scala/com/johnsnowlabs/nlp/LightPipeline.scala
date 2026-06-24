@@ -24,7 +24,20 @@ import org.apache.spark.sql.{DataFrame, Dataset}
 import scala.collection.JavaConverters._
 import scala.util.{Failure, Success, Try}
 
-class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean = false) {
+class LightPipeline(
+    val pipelineModel: PipelineModel,
+    parseEmbeddings: Boolean = false,
+    val outputCols: Array[String] = Array.empty[String]) {
+
+  def this(pipelineModel: PipelineModel, parseEmbeddings: Boolean) =
+    this(pipelineModel, parseEmbeddings, Array.empty[String])
+
+  def this(
+      pipelineModel: PipelineModel,
+      parseEmbeddings: Boolean,
+      outputCols: java.util.List[String]) = {
+    this(pipelineModel, parseEmbeddings, outputCols.asScala.toArray)
+  }
 
   private var ignoreUnsupported = false
 
@@ -34,7 +47,31 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
 
   def getStages: Array[Transformer] = pipelineModel.stages
 
-  def transform(dataFrame: Dataset[_]): DataFrame = pipelineModel.transform(dataFrame)
+  def transform(dataFrame: Dataset[_]): DataFrame = {
+    val transformedDf = pipelineModel.transform(dataFrame)
+
+    if (outputCols.nonEmpty) {
+
+      val documentAssemblers = pipelineModel.stages.toList
+        .filter(s => s.isInstanceOf[DocumentAssembler])
+        .map(s => s.asInstanceOf[DocumentAssembler])
+
+      val idColName = documentAssemblers.headOption match {
+        case Some(docAssembler) if docAssembler.isDefined(docAssembler.idCol) =>
+          docAssembler.getIdCol
+        case _ =>
+          "doc_id"
+      }
+      val mandatoryCols = Seq(idColName, "document") ++ outputCols
+
+      val allCols = (dataFrame.columns ++ transformedDf.columns).distinct
+      val existingCols = allCols.filter(c => mandatoryCols.contains(c))
+
+      transformedDf.select(existingCols.head, existingCols.tail: _*)
+    } else {
+      transformedDf
+    }
+  }
 
   def fullAnnotate(targets: Array[String]): Array[Map[String, Seq[IAnnotation]]] = {
     targets.par
@@ -44,7 +81,7 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
 
   def fullAnnotate(target: String, optionalTarget: String = ""): Map[String, Seq[IAnnotation]] = {
     if (target.contains("/") && ResourceHelper.validFile(target)) {
-      fullAnnotateImage(target)
+      fullAnnotateImage(target, optionalTarget)
     } else {
       fullAnnotateInternal(target, optionalTarget)
     }
@@ -60,7 +97,7 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
     }
 
     if (targets.head.contains("/") && ResourceHelper.validFile(targets.head)) {
-      targets.par.map(target => fullAnnotateImage(target)).toArray
+      fullAnnotateImages(targets, optionalTargets)
     } else {
       (targets zip optionalTargets).par.map { case (target, optionalTarget) =>
         fullAnnotate(target, optionalTarget)
@@ -68,14 +105,19 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
     }
   }
 
-  def fullAnnotateImage(pathToImages: Array[String]): Array[Map[String, Seq[IAnnotation]]] = {
-    pathToImages.par
-      .map(imageFilePath => fullAnnotateInternal(imageFilePath))
-      .toArray
+  def fullAnnotateImages(
+      pathToImages: Array[String],
+      texts: Array[String] = Array.empty): Array[Map[String, Seq[IAnnotation]]] = {
+    val safeTexts = if (texts.isEmpty) Array.fill(pathToImages.length)("") else texts
+    (pathToImages zip safeTexts).par.map { case (imageFilePath, text) =>
+      fullAnnotateImage(imageFilePath, text)
+    }.toArray
   }
 
-  def fullAnnotateImage(pathToImage: String): Map[String, Seq[IAnnotation]] = {
-    fullAnnotateInternal(pathToImage)
+  def fullAnnotateImage(pathToImage: String, text: String = ""): Map[String, Seq[IAnnotation]] = {
+    if (!ResourceHelper.validFile(pathToImage)) {
+      Map()
+    } else fullAnnotateInternal(pathToImage, text)
   }
 
   def fullAnnotate(audio: Array[Double]): Map[String, Seq[IAnnotation]] = {
@@ -91,16 +133,44 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
     audios.par.map(audio => fullAnnotate(audio)).toArray
   }
 
+  def fullAnnotate(
+      ids: Array[Int],
+      texts: Array[String]): Array[Map[String, Seq[IAnnotation]]] = {
+
+    require(ids.length == texts.length, "ids and texts must have the same length")
+
+    (ids zip texts).par.map { case (id, text) =>
+      fullAnnotateInternal(target = text, id = Some(id))
+    }.toArray
+  }
+
+  def fullAnnotateWithMeta(
+      target: String,
+      metadata: Map[String, Seq[String]]): Map[String, Seq[IAnnotation]] = {
+    fullAnnotateInternal(target = target, metadata = metadata)
+  }
+
+  def fullAnnotateWithMeta(
+      targets: Array[String],
+      metadatas: Array[Map[String, Seq[String]]]): Array[Map[String, Seq[IAnnotation]]] = {
+    require(targets.length == metadatas.length, "targets and metadatas must have the same length")
+    (targets zip metadatas).par.map { case (target, meta) =>
+      fullAnnotateInternal(target = target, metadata = meta)
+    }.toArray
+  }
+
   private def fullAnnotateInternal(
       target: String,
       optionalTarget: String = "",
       audio: Array[Float] = Array.empty,
+      id: Option[Int] = None,
+      metadata: Map[String, Seq[String]] = Map.empty[String, Seq[String]],
       startWith: Map[String, Seq[IAnnotation]] = Map.empty[String, Seq[IAnnotation]])
       : Map[String, Seq[IAnnotation]] = {
-    getStages.foldLeft(startWith)((annotations, transformer) => {
+    val annotations = getStages.foldLeft(startWith)((annotations, transformer) => {
       transformer match {
         case documentAssembler: DocumentAssembler =>
-          processDocumentAssembler(documentAssembler, target, annotations)
+          processDocumentAssembler(documentAssembler, target, annotations, id)
         case multiDocumentAssembler: MultiDocumentAssembler =>
           processMultipleDocumentAssembler(
             multiDocumentAssembler,
@@ -108,32 +178,89 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
             optionalTarget,
             annotations)
         case imageAssembler: ImageAssembler =>
-          processImageAssembler(target, imageAssembler, annotations)
+          processImageAssembler(target, optionalTarget, imageAssembler, annotations)
         case audioAssembler: AudioAssembler =>
           processAudioAssembler(audio, audioAssembler, annotations)
         case lazyAnnotator: AnnotatorModel[_] if lazyAnnotator.getLazyAnnotator => annotations
         case recursiveAnnotator: HasRecursiveTransform[_] with AnnotatorModel[_] =>
           processRecursiveAnnotator(recursiveAnnotator, annotations)
         case annotatorModel: AnnotatorModel[_] =>
-          processAnnotatorModel(annotatorModel, annotations)
+          processAnnotatorModel(annotatorModel, annotations, metadata)
         case finisher: Finisher => annotations.filterKeys(finisher.getInputCols.contains)
         case graphFinisher: GraphFinisher => processGraphFinisher(graphFinisher, annotations)
         case rawModel: RawAnnotator[_] => processRowAnnotator(rawModel, annotations)
         case pipeline: PipelineModel =>
-          new LightPipeline(pipeline, parseEmbeddings)
-            .fullAnnotateInternal(target, optionalTarget, audio, annotations)
+          new LightPipeline(pipeline, parseEmbeddings, outputCols)
+            .fullAnnotateInternal(target, optionalTarget, audio, id, metadata, annotations)
         case _ => annotations
       }
     })
+
+    if (outputCols.nonEmpty) {
+      val documentAssemblers = pipelineModel.stages.toList
+        .filter(s => s.isInstanceOf[DocumentAssembler])
+        .map(s => s.asInstanceOf[DocumentAssembler])
+
+      val idColName = documentAssemblers.headOption match {
+        case Some(docAssembler) if docAssembler.isDefined(docAssembler.idCol) =>
+          docAssembler.getIdCol
+        case _ =>
+          "doc_id"
+      }
+
+      val filteredAnnotations = annotations.filter { case (colName, _) =>
+        outputCols.contains(colName) ||
+        colName.equalsIgnoreCase("document") ||
+        colName.equalsIgnoreCase(idColName)
+      }
+      filteredAnnotations
+    } else {
+      annotations
+    }
+
   }
 
   private def processDocumentAssembler(
       documentAssembler: DocumentAssembler,
       target: String,
-      annotations: Map[String, Seq[IAnnotation]]): Map[String, Seq[IAnnotation]] = {
-    annotations.updated(
-      documentAssembler.getOutputCol,
-      documentAssembler.assemble(target, Map.empty[String, String]))
+      annotations: Map[String, Seq[IAnnotation]],
+      id: Option[Int] = None): Map[String, Seq[IAnnotation]] = {
+
+    val documentAnnots = documentAssembler.assemble(target, Map("sentence" -> "0"))
+
+    val updatedDocumentAnnots = id match {
+      case Some(docId) =>
+        val idStr = docId.toString
+        documentAnnots.map { ann =>
+          ann.copy(metadata = ann.metadata + ("id" -> idStr))
+        }
+      case None =>
+        documentAnnots
+    }
+
+    var result = annotations.updated(documentAssembler.getOutputCol, updatedDocumentAnnots)
+
+    id.foreach { docId =>
+      val idStr = docId.toString
+      val idLength = idStr.length
+
+      val idAnnotation = Annotation(
+        annotatorType = AnnotatorType.DUMMY,
+        begin = 0,
+        end = idLength,
+        result = idStr,
+        metadata = Map("id" -> idStr))
+
+      val idColName =
+        if (documentAssembler.isDefined(documentAssembler.idCol))
+          documentAssembler.getIdCol
+        else
+          "doc_id"
+
+      result = result + (idColName -> Seq(idAnnotation))
+    }
+
+    result
   }
 
   private def processMultipleDocumentAssembler(
@@ -149,7 +276,7 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
       val input = outputTuple._2
       multiDocumentAnnotations = multiDocumentAnnotations ++ annotations.updated(
         outputCol,
-        multiDocumentAssembler.assemble(input, Map.empty[String, String]))
+        multiDocumentAssembler.assemble(input, Map("sentence" -> "0")))
     }
 
     annotations ++ multiDocumentAnnotations
@@ -157,12 +284,13 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
 
   private def processImageAssembler(
       target: String,
+      text: String,
       imageAssembler: ImageAssembler,
       annotations: Map[String, Seq[IAnnotation]]): Map[String, Seq[IAnnotation]] = {
     val currentImageFields = ImageIOUtils.imagePathToImageFields(target)
     annotations.updated(
       imageAssembler.getOutputCol,
-      imageAssembler.assemble(currentImageFields, Map.empty[String, String]))
+      imageAssembler.assemble(currentImageFields, Map.empty[String, String], Some(text)))
   }
 
   private def processAudioAssembler(
@@ -176,16 +304,29 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
 
   private def processAnnotatorModel(
       annotatorModel: AnnotatorModel[_],
-      annotations: Map[String, Seq[IAnnotation]]): Map[String, Seq[IAnnotation]] = {
-    annotatorModel match {
+      annotations: Map[String, Seq[IAnnotation]],
+      metadata: Map[String, Seq[String]]): Map[String, Seq[IAnnotation]] = {
+    val preparedAnnotations = annotatorModel match {
+      case hook: HasLightPipelineAnnotate =>
+        hook.beforeAnnotateLight(annotations, metadata)
+      case _ => annotations
+    }
+
+    val updatedAnnotations = annotatorModel match {
       case annotator: HasSimpleAnnotate[_] =>
-        processAnnotator(annotator, annotations)
+        processAnnotator(annotator, preparedAnnotations)
       case batchedAnnotator: HasBatchedAnnotate[_] =>
-        processBatchedAnnotator(batchedAnnotator, annotations)
+        processBatchedAnnotator(batchedAnnotator, preparedAnnotations)
       case batchedAnnotatorImage: HasBatchedAnnotateImage[_] =>
-        processBatchedAnnotatorImage(batchedAnnotatorImage, annotations)
+        processBatchedAnnotatorImage(batchedAnnotatorImage, preparedAnnotations)
       case batchedAnnotatorAudio: HasBatchedAnnotateAudio[_] =>
-        processBatchedAnnotatorAudio(batchedAnnotatorAudio, annotations)
+        processBatchedAnnotatorAudio(batchedAnnotatorAudio, preparedAnnotations)
+    }
+
+    annotatorModel match {
+      case hook: HasLightPipelineAnnotate =>
+        hook.afterAnnotateLight(updatedAnnotations, metadata)
+      case _ => updatedAnnotations
     }
   }
 
@@ -209,9 +350,9 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
       getCombinedAnnotations(batchedAnnotatorImage.getInputCols, annotations)
     val batchedAnnotations = Seq(combinedAnnotations.map(_.asInstanceOf[AnnotationImage]))
 
-    annotations.updated(
-      batchedAnnotatorImage.getOutputCol,
-      batchedAnnotatorImage.batchAnnotate(batchedAnnotations).head)
+    val outputCol = batchedAnnotatorImage.getOutputCol
+    val annotateResult = batchedAnnotatorImage.batchAnnotate(batchedAnnotations)
+    annotations.updated(outputCol, annotateResult.head)
   }
 
   private def processBatchedAnnotatorAudio(
@@ -317,6 +458,20 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
       .asJava
   }
 
+  private def toScalaMetadata(
+      metadata: java.util.Map[String, java.util.List[String]]): Map[String, Seq[String]] = {
+    metadata.asScala.map { case (key, values) => key -> values.asScala.toSeq }.toMap
+  }
+
+  def fullAnnotateWithMetaJava(
+      target: String,
+      metadata: java.util.Map[String, java.util.List[String]])
+      : java.util.Map[String, java.util.List[IAnnotation]] = {
+    fullAnnotateWithMeta(target, toScalaMetadata(metadata))
+      .mapValues(_.map(castToJavaAnnotation).asJava)
+      .asJava
+  }
+
   private def castToJavaAnnotation(annotation: IAnnotation): IAnnotation = {
     Try(annotation.asInstanceOf[Annotation]) match {
       case Success(annotation) => {
@@ -344,6 +499,22 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
       .asJava
   }
 
+  def fullAnnotateWithMetaJava(
+      targets: java.util.ArrayList[String],
+      metadatas: java.util.ArrayList[java.util.Map[String, java.util.List[String]]])
+      : java.util.List[java.util.Map[String, java.util.List[IAnnotation]]] = {
+    require(targets.size() == metadatas.size(), "targets and metadatas must have the same length")
+    val scalaTargets = targets.asScala.toArray
+    val scalaMetas = metadatas.asScala.map(toScalaMetadata).toArray
+
+    fullAnnotateWithMeta(scalaTargets, scalaMetas)
+      .map { annotations =>
+        annotations.mapValues(_.map(castToJavaAnnotation).asJava).asJava
+      }
+      .toList
+      .asJava
+  }
+
   def fullAnnotateJava(
       targets: java.util.ArrayList[String],
       optionalTargets: java.util.ArrayList[String])
@@ -361,15 +532,32 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
     fullAnnotateImage(pathToImage).mapValues(_.asJava).asJava
   }
 
-  def fullAnnotateImageJava(pathToImages: java.util.ArrayList[String])
+  def fullAnnotateImageJava(
+      pathToImages: java.util.ArrayList[String],
+      texts: java.util.ArrayList[String])
       : java.util.List[java.util.Map[String, java.util.List[IAnnotation]]] = {
+    if (texts.isEmpty) {
+      pathToImages.asScala.par
+        .map { imageFilePath =>
+          fullAnnotateInternal(imageFilePath).mapValues(_.asJava).asJava
+        }
+        .toList
+        .asJava
+    } else {
 
-    pathToImages.asScala.par
-      .map { imageFilePath =>
-        fullAnnotateInternal(imageFilePath).mapValues(_.asJava).asJava
+      if (pathToImages.size != texts.size) {
+        throw new IllegalArgumentException(
+          "pathToImages and texts must have the same number of elements.")
       }
-      .toList
-      .asJava
+      val imageTextPairs = pathToImages.asScala.zip(texts.asScala).par
+
+      imageTextPairs
+        .map { case (imageFilePath, text) =>
+          fullAnnotateImage(imageFilePath, text).mapValues(_.asJava).asJava
+        }
+        .toList
+        .asJava
+    }
   }
 
   def fullAnnotateSingleAudioJava(
@@ -387,6 +575,21 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
       .asJava
   }
 
+  def fullAnnotateWithIdsJava(
+      ids: java.util.ArrayList[Integer],
+      texts: java.util.ArrayList[String])
+      : java.util.List[java.util.Map[String, java.util.List[IAnnotation]]] = {
+
+    val scalaIds = ids.asScala.map(_.toInt).toArray
+    val scalaTexts = texts.asScala.toArray
+    fullAnnotate(scalaIds, scalaTexts)
+      .map { annotations: Map[String, Seq[IAnnotation]] =>
+        annotations.mapValues(_.map(castToJavaAnnotation).asJava).asJava
+      }
+      .toList
+      .asJava
+  }
+
   def annotate(targets: Array[String]): Array[Map[String, Seq[String]]] = {
     targets.par
       .map(target => annotate(target))
@@ -394,14 +597,16 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
   }
 
   def annotate(target: String, optionalTarget: String = ""): Map[String, Seq[String]] = {
-    fullAnnotate(target, optionalTarget).mapValues(_.map { iAnnotation =>
-      val annotation = iAnnotation.asInstanceOf[Annotation]
-      annotation.annotatorType match {
-        case AnnotatorType.WORD_EMBEDDINGS | AnnotatorType.SENTENCE_EMBEDDINGS
-            if parseEmbeddings =>
-          annotation.embeddings.mkString(" ")
-        case _ => annotation.result
-      }
+    val annotations = fullAnnotate(target, optionalTarget)
+    annotations.mapValues(_.map {
+      case annotation: Annotation =>
+        annotation.annotatorType match {
+          case AnnotatorType.WORD_EMBEDDINGS | AnnotatorType.SENTENCE_EMBEDDINGS
+              if parseEmbeddings =>
+            annotation.embeddings.mkString(" ")
+          case _ => annotation.result
+        }
+      case _ => ""
     })
   }
 
@@ -419,6 +624,53 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
     }.toArray
   }
 
+  def annotate(ids: Array[Int], texts: Array[String]): Array[Map[String, Seq[String]]] = {
+
+    require(ids.length == texts.length, "ids and texts must have the same length")
+
+    val annotationsArray = fullAnnotate(ids, texts)
+
+    annotationsArray.map { annotations =>
+      annotations.map { case (colName, annots) =>
+        colName -> annots.map {
+          case annotation: Annotation =>
+            annotation.annotatorType match {
+              case AnnotatorType.WORD_EMBEDDINGS | AnnotatorType.SENTENCE_EMBEDDINGS
+                  if parseEmbeddings =>
+                annotation.embeddings.mkString(" ")
+              case _ => annotation.result
+            }
+          case _ => ""
+        }
+      }
+    }
+  }
+
+  def annotateWithMeta(
+      target: String,
+      metadata: Map[String, Seq[String]]): Map[String, Seq[String]] = {
+    val annotations = fullAnnotateWithMeta(target, metadata)
+    annotations.mapValues(_.map {
+      case annotation: Annotation =>
+        annotation.annotatorType match {
+          case AnnotatorType.WORD_EMBEDDINGS | AnnotatorType.SENTENCE_EMBEDDINGS
+              if parseEmbeddings =>
+            annotation.embeddings.mkString(" ")
+          case _ => annotation.result
+        }
+      case _ => ""
+    })
+  }
+
+  def annotateWithMeta(
+      targets: Array[String],
+      metadatas: Array[Map[String, Seq[String]]]): Array[Map[String, Seq[String]]] = {
+    require(targets.length == metadatas.length, "targets and metadatas must have the same length")
+    (targets zip metadatas).par.map { case (target, meta) =>
+      annotateWithMeta(target, meta)
+    }.toArray
+  }
+
   def annotateJava(target: String): java.util.Map[String, java.util.List[String]] = {
     annotate(target).mapValues(_.asJava).asJava
   }
@@ -427,6 +679,13 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
       target: String,
       optionalTarget: String): java.util.Map[String, java.util.List[String]] = {
     annotate(target, optionalTarget).mapValues(_.asJava).asJava
+  }
+
+  def annotateWithMetaJava(
+      target: String,
+      metadata: java.util.Map[String, java.util.List[String]])
+      : java.util.Map[String, java.util.List[String]] = {
+    annotateWithMeta(target, toScalaMetadata(metadata)).mapValues(_.asJava).asJava
   }
 
   def annotateJava(targets: java.util.ArrayList[String])
@@ -444,6 +703,36 @@ class LightPipeline(val pipelineModel: PipelineModel, parseEmbeddings: Boolean =
     (targets.asScala zip optionalTargets.asScala).par
       .map { case (target, optionalTarget) =>
         annotateJava(target, optionalTarget)
+      }
+      .toList
+      .asJava
+  }
+
+  def annotateWithMetaJava(
+      targets: java.util.ArrayList[String],
+      metadatas: java.util.ArrayList[java.util.Map[String, java.util.List[String]]])
+      : java.util.List[java.util.Map[String, java.util.List[String]]] = {
+    require(targets.size() == metadatas.size(), "targets and metadatas must have the same length")
+    val scalaTargets = targets.asScala.toArray
+    val scalaMetas = metadatas.asScala.map(toScalaMetadata).toArray
+
+    annotateWithMeta(scalaTargets, scalaMetas)
+      .map { results =>
+        results.mapValues(_.asJava).asJava
+      }
+      .toList
+      .asJava
+  }
+
+  def annotateWithIdsJava(ids: java.util.ArrayList[Integer], texts: java.util.ArrayList[String])
+      : java.util.List[java.util.Map[String, java.util.List[String]]] = {
+
+    val scalaIds = ids.asScala.map(_.toInt).toArray
+    val scalaTexts = texts.asScala.toArray
+
+    annotate(scalaIds, scalaTexts)
+      .map { results =>
+        results.mapValues(_.asJava).asJava
       }
       .toList
       .asJava

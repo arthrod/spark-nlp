@@ -113,11 +113,11 @@ object Dependencies {
   val tensorflowM1 = "com.johnsnowlabs.nlp" %% "tensorflow-m1" % tensorflowVersion
   val tensorflowLinuxAarch64 = "com.johnsnowlabs.nlp" %% "tensorflow-aarch64" % tensorflowVersion
 
-  val onnxRuntimeVersion = "1.19.2"
+  val onnxRuntimeVersion = "1.24.3"
   val onnxCPU = "com.microsoft.onnxruntime" % "onnxruntime" % onnxRuntimeVersion
   val onnxGPU = "com.microsoft.onnxruntime" % "onnxruntime_gpu" % onnxRuntimeVersion
 
-  val openVinoRuntimeVersion = "0.1.0"
+  val openVinoRuntimeVersion = "0.2.0"
   val openVinoCPU = "com.johnsnowlabs.nlp" %% "jsl-openvino-cpu" % openVinoRuntimeVersion
   val openVinoGPU = "com.johnsnowlabs.nlp" %% "jsl-openvino-gpu" % openVinoRuntimeVersion
 
@@ -128,14 +128,39 @@ object Dependencies {
   val azureIdentity = "com.azure" % "azure-identity" % azureIdentityVersion % Provided
   val azureStorage = "com.azure" % "azure-storage-blob" % azureStorageVersion % Provided
 
-  val llamaCppVersion = "0.1.4"
-  val llamaCppCPU = "com.johnsnowlabs.nlp" %% "jsl-llamacpp-cpu" % llamaCppVersion
-  val llamaCppGPU = "com.johnsnowlabs.nlp" %% "jsl-llamacpp-gpu" % llamaCppVersion
-  val llamaCppSilicon = "com.johnsnowlabs.nlp" %% "jsl-llamacpp-silicon" % llamaCppVersion
-  val llamaCppAarch64 = "com.johnsnowlabs.nlp" %% "jsl-llamacpp-aarch64" % llamaCppVersion
+  val llamaCppVersion = "2.0.3"
+  val llamaCppCPU = "com.johnsnowlabs.nlp" % "jsl-llamacpp-cpu" % llamaCppVersion
+  val llamaCppGPU = "com.johnsnowlabs.nlp" % "jsl-llamacpp-gpu" % llamaCppVersion
+  val llamaCppSilicon = "com.johnsnowlabs.nlp" % "jsl-llamacpp-silicon" % llamaCppVersion
+  val llamaCppAarch64 = "com.johnsnowlabs.nlp" % "jsl-llamacpp-aarch64" % llamaCppVersion
 
-  val jsoupVersion = "1.18.1"
+  val jsoupVersion = "1.18.2"
+
   val jsoup = "org.jsoup" % "jsoup" % jsoupVersion
 
+  val jakartaMailVersion = "2.1.3"
+  val jakartaMail = "jakarta.mail" % "jakarta.mail-api" % jakartaMailVersion
+  val angusMailVersion = "2.0.3"
+  val angusMail = "org.eclipse.angus" % "angus-mail" % angusMailVersion
+
+  val poiFullVersion = "5.4.1"
+  val poiSchemas = "org.apache.poi" % "poi-ooxml-full" % poiFullVersion
+  val poiDocx = "org.apache.poi" % "poi-ooxml" % poiFullVersion
+  val scratchpad = "org.apache.poi" % "poi-scratchpad" % poiFullVersion
+
+  val pdfBoxVersion = "2.0.28"
+  val pdfBox = "org.apache.pdfbox" % "pdfbox" % pdfBoxVersion
+
+  val flexmarkVersion = "0.61.34"
+  val flexmark = "com.vladsch.flexmark" % "flexmark-all" % flexmarkVersion
+
+  val tagSoupVersion = "1.2.1"
+  val tagSoup = "org.ccil.cowan.tagsoup" % "tagsoup" % tagSoupVersion
+
+  val pineconeScalaClient = "io.cequence" %% "pinecone-scala-client" % "1.3.2"
+
+
+  val json4sVersion = "3.7.0-M11"
+  val json4sNative = "org.json4s" %% "json4s-native" % json4sVersion
   /** ------- Dependencies end  ------- */
 }

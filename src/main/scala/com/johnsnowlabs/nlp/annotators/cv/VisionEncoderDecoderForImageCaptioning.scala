@@ -20,6 +20,10 @@ import com.johnsnowlabs.ml.ai.VisionEncoderDecoder
 import com.johnsnowlabs.ml.onnx.{OnnxWrapper, ReadOnnxModel, WriteOnnxModel}
 import com.johnsnowlabs.ml.ai.util.Generation.GenerationConfig
 import com.johnsnowlabs.ml.onnx.OnnxWrapper.EncoderDecoderWithoutPastWrappers
+import com.johnsnowlabs.ml.openvino.{OpenvinoWrapper, ReadOpenvinoModel, WriteOpenvinoModel}
+import com.johnsnowlabs.ml.openvino.OpenvinoWrapper.{
+  EncoderDecoderWithoutPastWrappers => OpenvinoEncoderDecoderWithoutPastWrappers
+}
 import com.johnsnowlabs.ml.tensorflow.{
   ReadTensorflowModel,
   TensorflowWrapper,
@@ -31,10 +35,11 @@ import com.johnsnowlabs.ml.util.LoadExternalModel.{
   modelSanityCheck,
   notSupportedEngineError
 }
-import com.johnsnowlabs.ml.util.{ONNX, TensorFlow}
+import com.johnsnowlabs.ml.util.{ONNX, Openvino, TensorFlow}
 import com.johnsnowlabs.nlp.AnnotatorType.{DOCUMENT, IMAGE}
 import com.johnsnowlabs.nlp._
 import com.johnsnowlabs.nlp.annotators.cv.feature_extractor.Preprocessor
+import com.johnsnowlabs.nlp.annotators.seq2seq.M2M100Transformer
 import com.johnsnowlabs.nlp.annotators.tokenizer.bpe.{BpeTokenizer, Gpt2Tokenizer}
 import com.johnsnowlabs.nlp.serialization.{MapFeature, StructFeature}
 import com.johnsnowlabs.util.JsonParser
@@ -142,6 +147,7 @@ class VisionEncoderDecoderForImageCaptioning(override val uid: String)
     with HasImageFeatureProperties
     with WriteTensorflowModel
     with WriteOnnxModel
+    with WriteOpenvinoModel
     with HasEngine
     with HasRescaleFactor
     with HasGeneratorProperties {
@@ -244,6 +250,7 @@ class VisionEncoderDecoderForImageCaptioning(override val uid: String)
       spark: SparkSession,
       tensorflowWrapper: Option[TensorflowWrapper],
       onnxWrapper: Option[EncoderDecoderWithoutPastWrappers],
+      openvinoWrapper: Option[OpenvinoEncoderDecoderWithoutPastWrappers],
       preprocessor: Preprocessor): this.type = {
     if (_model.isEmpty) {
 
@@ -256,6 +263,7 @@ class VisionEncoderDecoderForImageCaptioning(override val uid: String)
           new VisionEncoderDecoder(
             tensorflowWrapper,
             onnxWrapper,
+            openvinoWrapper,
             configProtoBytes = getConfigProtoBytes,
             tokenizer = tokenizer,
             preprocessor = preprocessor,
@@ -368,6 +376,18 @@ class VisionEncoderDecoderForImageCaptioning(override val uid: String)
           Seq((wrappers.decoder, "decoder_model.onnx")),
           VisionEncoderDecoderForImageCaptioning.suffix)
 
+      case Openvino.name =>
+        val wrappers = getModelIfNotSet.openvinoWrapper
+        writeOpenvinoModels(
+          path,
+          spark,
+          Seq((wrappers.get.encoder, "openvino_encoder_model.xml")),
+          VisionEncoderDecoderForImageCaptioning.suffix)
+        writeOpenvinoModels(
+          path,
+          spark,
+          Seq((wrappers.get.decoder, "openvino_decoder_model.xml")),
+          VisionEncoderDecoderForImageCaptioning.suffix)
     }
   }
 }
@@ -393,11 +413,16 @@ trait ReadablePretrainedVisionEncoderDecoderModel
     super.pretrained(name, lang, remoteLoc)
 }
 
-trait ReadVisionEncoderDecoderDLModel extends ReadTensorflowModel with ReadOnnxModel {
+trait ReadVisionEncoderDecoderDLModel
+    extends ReadTensorflowModel
+    with ReadOnnxModel
+    with ReadOpenvinoModel {
   this: ParamsAndFeaturesReadable[VisionEncoderDecoderForImageCaptioning] =>
 
   override val tfFile: String = "vision_encoder_decoder_tensorflow"
   override val onnxFile: String = "vision_encoder_decoder_onnx"
+  override val openvinoFile: String = "vision_encoder_decoder_openvino"
+
   val suffix = "_image_classification"
   def readModel(
       instance: VisionEncoderDecoderForImageCaptioning,
@@ -418,7 +443,7 @@ trait ReadVisionEncoderDecoderDLModel extends ReadTensorflowModel with ReadOnnxM
     instance.getEngine match {
       case TensorFlow.name =>
         val tf = readTensorflowModel(path, spark, "_vision_encoder_decoder_tf")
-        instance.setModelIfNotSet(spark, Some(tf), None, preprocessor)
+        instance.setModelIfNotSet(spark, Some(tf), None, None, preprocessor)
 
       case ONNX.name =>
         val wrappers =
@@ -433,7 +458,19 @@ trait ReadVisionEncoderDecoderDLModel extends ReadTensorflowModel with ReadOnnxM
           wrappers("encoder_model.onnx"),
           decoder = wrappers("decoder_model.onnx"))
 
-        instance.setModelIfNotSet(spark, None, Some(onnxWrappers), preprocessor)
+        instance.setModelIfNotSet(spark, None, Some(onnxWrappers), None, preprocessor)
+
+      case Openvino.name =>
+        val decoderWrappers =
+          readOpenvinoModels(path, spark, Seq("openvino_decoder_model.xml"), suffix)
+        val encoderWrappers =
+          readOpenvinoModels(path, spark, Seq("openvino_encoder_model.xml"), suffix)
+        val ovWrapper = {
+          OpenvinoEncoderDecoderWithoutPastWrappers(
+            encoder = encoderWrappers("openvino_encoder_model.xml"),
+            decoder = decoderWrappers("openvino_decoder_model.xml"))
+        }
+        instance.setModelIfNotSet(spark, None, None, Some(ovWrapper), preprocessor)
       case _ =>
         throw new Exception(notSupportedEngineError)
     }
@@ -543,7 +580,7 @@ trait ReadVisionEncoderDecoderDLModel extends ReadTensorflowModel with ReadOnnxM
           */
         annotatorModel
           .setSignatures(_signatures)
-          .setModelIfNotSet(spark, Some(tfWrapper), None, preprocessorConfig)
+          .setModelIfNotSet(spark, Some(tfWrapper), None, None, preprocessorConfig)
 
       case ONNX.name =>
         val onnxWrapperEncoder =
@@ -568,7 +605,35 @@ trait ReadVisionEncoderDecoderDLModel extends ReadTensorflowModel with ReadOnnxM
           EncoderDecoderWithoutPastWrappers(onnxWrapperEncoder, onnxWrapperDecoder)
 
         annotatorModel
-          .setModelIfNotSet(spark, None, Some(onnxWrappers), preprocessorConfig)
+          .setModelIfNotSet(spark, None, Some(onnxWrappers), None, preprocessorConfig)
+
+      case Openvino.name =>
+        val openvinoEncoderWrapper =
+          OpenvinoWrapper.read(
+            spark,
+            localModelPath,
+            zipped = false,
+            useBundle = true,
+            detectedEngine = detectedEngine,
+            modelName = "openvino_encoder_model")
+        val openvinoDecoderWrapper =
+          OpenvinoWrapper.read(
+            spark,
+            localModelPath,
+            zipped = false,
+            useBundle = true,
+            detectedEngine = detectedEngine,
+            modelName = "openvino_decoder_model")
+        val openvinoWrapper =
+          OpenvinoEncoderDecoderWithoutPastWrappers(
+            encoder = openvinoEncoderWrapper,
+            decoder = openvinoDecoderWrapper)
+        annotatorModel.setModelIfNotSet(
+          spark,
+          None,
+          None,
+          Some(openvinoWrapper),
+          preprocessorConfig)
 
       case _ =>
         throw new Exception(notSupportedEngineError)

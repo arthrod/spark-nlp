@@ -16,3 +16,14 @@ from sparknlp.annotator.cv.swin_for_image_classification import *
 from sparknlp.annotator.cv.convnext_for_image_classification import *
 from sparknlp.annotator.cv.vision_encoder_decoder_for_image_captioning import *
 from sparknlp.annotator.cv.clip_for_zero_shot_classification import *
+from sparknlp.annotator.cv.blip_for_question_answering import *
+from sparknlp.annotator.cv.janus_for_multimodal import *
+from sparknlp.annotator.cv.mllama_for_multimodal import *
+from sparknlp.annotator.cv.qwen2vl_transformer import *
+from sparknlp.annotator.cv.llava_for_multimodal import *
+from sparknlp.annotator.cv.phi3_vision_for_multimodal import *
+from sparknlp.annotator.cv.smolvlm_transformer import *
+from sparknlp.annotator.cv.paligemma_for_multimodal import *
+from sparknlp.annotator.cv.gemma3_for_multimodal import *
+from sparknlp.annotator.cv.internvl_for_multimodal import *
+from sparknlp.annotator.cv.florence2_transformer import *

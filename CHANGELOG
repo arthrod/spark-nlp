@@ -1,3 +1,439 @@
+=======
+6.4.2
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+* Properly close stream and avoid warning #14774
+* [SPARKNLP-1384] Add Hugging Face to Spark NLP model conversion notebooks (ONNX, OpenVINO, GGUF) #14775
+* [SPARKNLP-1145] Add BM25 lexical retrieval annotator (Approach + Model) #14776
+* [SPARKNLP-1395] Updating git notifications and bumping jsl-llama version #14777
+* Sparknlp 1396 introduce new sentence detection annotator #14782
+
+=======
+6.4.1
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+* Adding perfered engine to pretrained and minor fixes #14689
+* fix tags #14695
+* Update llama_cpp_in_Spark_NLP_LLMEntityExtractor.ipynb #14756
+* Add multimodal image support to VectorDBConnector #14760
+* updated GetFewShotexamples to handle multiple cases in MedicalLLMEnti… #14762
+* [SPARKNLP-1369] Fix cloud pretrained cache handling for large models #14763
+* Add LateChunkEmbeddings annotator #14764
+* [SPARKNLP-1359] Implement BiEncoderMultimodalEmbeddings #14767
+* Update ResourceDownloader.scala #14769
+* [SPARKNLP-1378] HTMLReader Default Headers Error #14770
+* [SPARKNLP-1385] Add sentenceAwareFiltering param #14772
+
+=======
+6.4.0
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1340] Adding instructions for Databricks Volume #14746
+* [SPARKNLP-1279] Introduce LLMNer #14735
+* [SPARKNLP-1342] Adding support for ODT files to readers #14747
+* [SPARKNLP-1342] Adding support for TSV files to readers #14748
+* [SPARKNLP-1346] Adding support for Epub files to readers #14749
+* [SPARKNLP-1347] Adding Support for Rich Text Format #14750
+* [SPARKNLP-1328] Handle HTML/image fetch failures #14752
+* [SPARKNLP-1344] Adding DocumentTitleSplitter annotator #14751
+
+=======
+6.3.3
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1335] Implement Layout Aligner annotators #14737
+* [SPARKNLP-1336] Enhancements to LightPipeline #14734
+* [SPARKNLP-1287] vector db connector annotator #14729
+* [SPARKNLP-1231] implement modern bert embeddings #14736
+* [SPARKNLP-1341] Add MultiColumnAssembler #14743
+
+---------
+Bug Fixes
+---------
+
+* [SPARKNLP-1334] Updating POI dependency for readers #14727
+
+=======
+6.3.2
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1136] JSON Serialization for Features #14722
+* [SPARKNLP-1329] Adding image coordinates to metadata for Reader2Image #14725
+* [SPARKNLP-1333] Adding ids input for LightPipeline #14726
+
+---------
+Bug Fixes
+---------
+
+* Fix out of memory error when copying big models to a cloud storage
+
+=======
+6.3.1
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1304] Upgrade jsl-llamacpp to llama.cpp b7247 #14719
+* [SPARKNLP-1322] Store Structural Position for Tables and Images #14713
+* [SPARKNLP-1323] Adding instructions to setup MS Frabric on spark-nlp #14710
+
+---------
+Bug Fixes
+---------
+
+* [SPARKNLP-1324] handle nonstandard output tensor names better when loading onnx bert models #14711
+* Bugfix when resetting cache in ResourceDownloader #14712
+* Addition sentence info into DocumentAssembler output in LightPipeline #14714
+
+=======
+6.3.0
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1318] Reader2Image Integration with AutoGGUFVisionModel #14705
+
+---------
+Bug Fixes
+---------
+
+None
+
+=======
+6.2.3
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1317] Further NerDL Optimizations (#14699)
+* [SPARKNLP-1315] Fix input data type for CamemBertForTokenClassification
+
+---------
+Bug Fixes
+---------
+
+None
+
+=======
+6.2.2
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+None
+
+---------
+Bug Fixes
+---------
+* Fixes WordEmbeddings creating duplicate results
+* Minor fixes to NerDLApproach logging
+
+=======
+6.2.1
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1306] Adding hierarchical support for Readers
+* [SPARKNLP-1297] NerDLApproach Optimizations
+* XML Reader and Reader2Doc Improvements
+
+---------
+Bug Fixes
+---------
+* Add Java installation to Colab setup script
+
+=======
+6.2.0
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1288] AutoGGUF close model #14671
+* [SPARKNLP-1283] Add remove thinking flag #14672
+* [SPARKNLP-1293] Enhancements EntityRuler and DocumentNormalizer #14674
+* [SPARKNLP-1299] Add Hierarchical Element Identification to HTMLReader #14675
+
+---------
+Bug Fixes
+---------
+* [SPARKNLP-1300] RobertaEmbeddings: changing token sequence in warmup test #14677
+
+=======
+6.1.5
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1291] Adding support fort input string column on readers #14665
+* [SPARKNLP-1292] Adding fault-tolerance support for malformed XML #14666
+* [SPARKNLP-1290] Introducing ReaderAssembler Annotator #14668
+
+---------
+Bug Fixes
+---------
+* fix duplicate loading in FeaturesFallbackReader #14667
+
+=======
+6.1.4
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1261] Introducing Reader2Image Annotator #14658
+
+---------
+Bug Fixes
+---------
+None
+
+=======
+6.1.3
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1286] GGUFRankingFinisher (#14653)
+* [SPARKNLP-1282] Adding improvements to Reader2Doc #14656
+* [SPARKNLP-1244] NerDLGraphChecker #14657
+
+---------
+Bug Fixes
+---------
+None
+
+=======
+6.1.2
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1256] AutoGGUFReranker
+
+---------
+Bug Fixes
+---------
+* Fixed Issues with loading AutoGGUFVision models
+
+=======
+6.1.1
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1183] Upgrade openVINO
+* [SPARKNLP-1260] Implement Reader2Table Annotator
+* [SPARKNLP-1267] Batch Inference for new llama.cpp version
+* [SPARKNLP-1268] Multimodal implementation for new llama.cpp version
+* [SPARKNLP-1272] AutoGGUFModel can load AutoGGUFVision pretrained models
+
+---------
+Bug Fixes
+---------
+None
+
+=======
+6.1.0
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+
+* [SPARKNLP-1189] Introducing Phi4
+* [SPARKNLP-1259] Introducing Reader2Doc Annotator
+* [SPARKNLP-1194] Upgrade jsl-llamacpp to newest version
+
+---------
+Bug Fixes
+---------
+* Fix HuggingFace_OpenVINO_in_Spark_NLP_Qwen2VL.ipynb
+
+=======
+6.0.5
+=======
+---------------------------
+New Features & Enhancements
+---------------------------
+* Updating support for Microsoft Fabric (SPARKNLP-1215)
+* Adding Markdown Reader (SPARKNLP-1213 )
+
+---------
+Bug Fixes
+---------
+* Fix long-standing issues across the Spark NLP example notebooks (SPARKNLP-1166)
+
+=======
+6.0.4
+=======
+----------------
+New Features & Enhancements
+----------------
+* Introducing MiniLMEmbeddings (SPARKNLP-282)
+* Introducing DataFrameOptimizer (SPARKNLP-1086)
+* Added PDF Reader features (SPARKNLP-1161)
+
+=======
+6.0.3
+=======
+----------------
+New Features & Enhancements
+----------------
+* Introducing E5-V Universal Embeddings (SPARKNLP-1143)
+* Enhanced Chunking Strategies and Behavior (SPARKNLP-1125)
+* New XML Reader (SPARKNLP-1119)
+
+----------------
+Bug Fixes
+----------------
+* Fixed typo for Excel reader notebook
+
+=======
+6.0.2
+=======
+----------------
+New Features & Enhancements
+----------------
+* Introducing new Vision Language Models:
+  * InternVL (SPARKNLP-1123)
+  * Florance-2 (SPARKNLP-1131)
+* Introducing Partition and PartitionTransformer for unstructured data processing (SPARKNLP-1174)
+
+----------------
+Bug Fixes
+----------------
+* Adjusted python type annotations for the `AutoGGUFModel` (#14576)
+
+=======
+6.0.1
+=======
+----------------
+New Features & Enhancements
+----------------
+* Introducing new Vision Language Models:
+  * SmolVLM (SPARKNLP-1115)
+  * PaliGemma + PaliGemma2 (SPARKNLP-1121)
+  * Gemma 3 (SPARKNLP-1124)
+
+* Adding additional parameters options to PDF Reader (SPARKNLP-1158)
+
+----------------
+Bug Fixes
+----------------
+* Fixed typo in Python for RoBertaForMultipleChoice (SPARKNLP-1177)
+* Fixing typos in various jupyter notebooks
+
+=======
+6.0.0
+=======
+----------------
+New Features & Enhancements
+----------------
+* Introducing new large language models:
+  * OLMo model support (SPARKNLP-1006)
+  * Phi 3.5 Vision model support (SPARKNLP-1060)
+  * LLAVA model support (SPARKNLP-1033)
+  * CoHere model support (SPARKNLP-1032)
+  * Qwen2-VL model support (SPARKNLP-1077)
+  * Llama 3.2 Vision models (SPARKNLP-1078)
+  * Deepseek Janus model support (SPARKNLP-1088)
+  * Added LLAVA v1.5 7b quantized model
+  * Added StarCoder2 3b int8 model
+
+* New MultipleChoice Transformers:
+  * AlbertForMultipleChoice (SPARKNLP-1105)
+  * DistilBertForMultipleChoice (SPARKNLP-1106)
+  * RoBertaForMultipleChoice (SPARKNLP-1107)
+  * XlmRoBertaForMultipleChoice (SPARKNLP-1108)
+
+* New file format support:
+  * Excel files reader (SPARKNLP-1102)
+  * PowerPoint files reader (SPARKNLP-1103)
+  * PDF reader (SPARKNLP-1098)
+  * Text reader (SPARKNLP-1113)
+
+* Other improvements:
+  * AutoGGUFVisionModel for vision model support (SPARKNLP-1079)
+  * Added Extractor to SparkNLP (SPARKNLP-1109)
+  * Updated Python and Scala model names
+  * Improved error handling for AutoGGUF models
+
+----------------
+Bug Fixes
+----------------
+* Fixed typo in MXBAI notebook
+
+========
+5.5.3
+========
+----------------
+Bug Fixes & Enhancements
+----------------
+* BGEEmbeddings: The default pretrained model for BGEEmbeddings has been changed from "bge_base" to "bge_small_en_v1.5". Users relying on the old default will need to explicitly specify "bge_base" in the pretrained method.
+* Added useCLSToken parameter to allow users to choose between CLS token pooling and attention-based average pooling for sentence embeddings.
+* BGEEmbeddings: BGEEmbeddings now supports a `useCLSToken` parameter, which defaults to True. This affects the embedding calculation strategy. Existing users should verify their usage and potentially set this parameter explicitly.
+* Added HasClsTokenProperties in Scala: Introduced the HasClsTokenProperties trait in Scala providing useCLSToken parameter functionality for relevant annotators.
+* Fixing wrong padding in attention mask in `MPNet`, `BGE`, `E5`, `Mxbai`, `Nomic`, `SnowFlake`, and `UAE`. This resulted in wrong inference results in some cases and not equal to the ONNX version in transformers/sentence-transformers.
+* Various Performance Optimizations: Multiple changes across different models (Albert, Bart, CLIP, CamemBert, ConvNextClassifier, DeBerta, DistilBert, E5, Instructor, MPNet, Mxbai, Nomic, RoBerta, SnowFlake, UAE, ViTClassifier, VisionEncoderDecoder, Wav2Vec2, XlmRoBertaClassification, XlmRoberta) appear to focus on performance improvements and code cleanup, especially related to OpenVINO and ONNX inference. These may lead to faster inference times.
+* Fixing Llama3 download issue in Python.
+
+========
+5.5.2
+========
+----------------
+New Features & Enhancements
+----------------
+* OpenVINO Support for Transformers (PR #14408):
+Added OpenVINO inference support to a broad range of transformer-based annotators, including DeBertaForQuestionAnswering, DeBertaForSequenceClassification, RoBertaForTokenClassification, XlmRobertaForZeroShotClassification, BartTransformer, GPT2Transformer, and many others.
+* BLIPForQuestionAnswering Transformer (PR #14422):
+Introduced a new transformer BLIPForQuestionAnswering for image-based question answering tasks. The transformer processes images alongside associated questions to provide relevant answers.
+* AutoGGUFEmbeddings Annotator (PR #14433):
+Added AutoGGUFEmbeddings to support embeddings from AutoGGUFModels, providing rich sentence embeddings. Includes an end-to-end example notebook for usage.
+* HTML Parsing into DataFrame (PR #14449):
+Introduced sparknlp.read().html() to parse local or remote HTML files and convert them into structured Spark DataFrames for easier analysis.
+* Email Parsing into DataFrame (PR #14455):
+Added sparknlp.read().email() method to parse email files into structured DataFrames, enabling scalable analysis of email content. (Note: Dependent on #14449)
+* Microsoft Word Document Parsing into DataFrame (PR #14476):
+Added a new feature to parse .docx and .doc files into a Spark DataFrame, streamlining the integration of Word documents into NLP pipelines.
+* Microsoft Fabric Support (PR #14467):
+Introduced support for leveraging Microsoft Fabric for word embeddings storage and retrieval, enhancing scalability and efficiency.
+* cuDNN Upgrade Instructions on Databricks (PR #14451):
+Added instructions on upgrading cuDNN for GPU inference and cleaned up redundant Databricks installation instructions.
+* ChunkEmbeddings Metadata Preservation (PR #14462):
+Modified ChunkEmbeddings to preserve the original chunk’s metadata in the resulting embeddings, ensuring richer contextual information is retained.
+* Default Names and Languages for Annotators (PR #14469):
+Updated default names and language configurations for newly created seq2seq annotators to improve consistency and clarity.
+
+----------------
+Bug Fixes
+----------------
+* Spark Version Errors (PR #14467):
+Resolved issues related to long Spark versions when integrating Microsoft Fabric support.
+
+
 ========
 5.5.1
 ========

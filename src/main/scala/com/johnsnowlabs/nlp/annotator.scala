@@ -31,10 +31,11 @@ import com.johnsnowlabs.nlp.annotators.ld.dl.{
   ReadablePretrainedLanguageDetectorDLModel
 }
 import com.johnsnowlabs.nlp.annotators.ner.crf.ReadablePretrainedNerCrf
-import com.johnsnowlabs.nlp.annotators.ner.dl._
+import com.johnsnowlabs.nlp.annotators.ner.dl.{LLMEntityExtractor, _}
 import com.johnsnowlabs.nlp.annotators.parser.dep.ReadablePretrainedDependency
 import com.johnsnowlabs.nlp.annotators.parser.typdep.ReadablePretrainedTypedDependency
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.ReadablePretrainedPerceptron
+import com.johnsnowlabs.nlp.annotators.sbd.sat.{ReadSaTDLModel, ReadablePretrainedSaTModel}
 import com.johnsnowlabs.nlp.annotators.sda.vivekn.ReadablePretrainedVivekn
 import com.johnsnowlabs.nlp.annotators.sentence_detector_dl.{
   ReadablePretrainedSentenceDetectorDL,
@@ -827,5 +828,53 @@ package object annotator {
     com.johnsnowlabs.nlp.embeddings.SnowFlakeEmbeddings
 
   object SnowFlakeEmbeddings extends ReadablePretrainedSnowFlakeModel with ReadSnowFlakeDLModel
+
+  type AutoGGUFEmbeddings = com.johnsnowlabs.nlp.embeddings.AutoGGUFEmbeddings
+  object AutoGGUFEmbeddings
+      extends ReadablePretrainedAutoGGUFEmbeddings
+      with ReadAutoGGUFEmbeddings
+
+  type BiEncoderMultimodalEmbeddings =
+    com.johnsnowlabs.nlp.embeddings.BiEncoderMultimodalEmbeddings
+  object BiEncoderMultimodalEmbeddings
+      extends ReadablePretrainedBiEncoderMultimodalEmbeddings
+      with ReadBiEncoderMultimodalEmbeddingsDLModel
+
+  type AutoGGUFVisionModel = com.johnsnowlabs.nlp.annotators.seq2seq.AutoGGUFVisionModel
+  object AutoGGUFVisionModel
+      extends ReadablePretrainedAutoGGUFVisionModel
+      with ReadAutoGGUFVisionModel
+
+  type ModernBertEmbeddings = com.johnsnowlabs.nlp.embeddings.ModernBertEmbeddings
+  object ModernBertEmbeddings extends ReadablePretrainedModernBertModel with ReadModernBertDLModel
+
+  type VectorDBConnector = com.johnsnowlabs.ml.ai.VectorDBConnector
+  object VectorDBConnector extends DefaultParamsReadable[VectorDBConnector]
+
+  type Reader2Doc = com.johnsnowlabs.reader.Reader2Doc
+
+  object Reader2Doc extends DefaultParamsReadable[Reader2Doc]
+
+  type Reader2Table = com.johnsnowlabs.reader.Reader2Table
+
+  object Reader2Table extends DefaultParamsReadable[Reader2Table]
+
+  type Reader2Image = com.johnsnowlabs.reader.Reader2Image
+
+  object Reader2Image extends DefaultParamsReadable[Reader2Image]
+
+  type ReaderAssembler = com.johnsnowlabs.reader.ReaderAssembler
+
+  object ReaderAssembler extends DefaultParamsReadable[ReaderAssembler]
+
+  type LLMEntityExtractor = com.johnsnowlabs.nlp.annotators.ner.dl.LLMEntityExtractor
+
+  object LLMEntityExtractor
+      extends ReadablePretrainedLLMEntityExtractor
+      with ReadLLMEntityExtractor
+
+  type SentenceDetectorSaTModel = com.johnsnowlabs.nlp.annotators.sbd.sat.SentenceDetectorSaTModel
+
+  object SentenceDetectorSaTModel extends ReadablePretrainedSaTModel with ReadSaTDLModel
 
 }

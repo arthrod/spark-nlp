@@ -1,14 +1,13 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Overview: module code &#8212; Spark NLP 5.5.1 documentation</title>
+    <title>Overview: module code &#8212; Spark NLP 6.4.2 documentation</title>
   
   
   
@@ -18,33 +17,31 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../static/css/custom.css?v=e1fb877f" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js"></script>
-    <script src="../static/jquery.js"></script>
-    <script src="../static/underscore.js"></script>
-    <script src="../static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../static/doctools.js"></script>
-    <script src="../static/sphinx_highlight.js"></script>
-    <script src="../static/toggleprompt.js"></script>
+    <script data-url_root="../" id="documentation_options" src="../static/documentation_options.js?v=bf4b7637"></script>
+    <script src="../static/doctools.js?v=888ff710"></script>
+    <script src="../static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../static/toggleprompt.js?v=670350bf"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'modules/index';</script>
-    <link rel="shortcut icon" href="../static/fav.ico"/>
+    <link rel="icon" href="../static/fav.ico"/>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -57,6 +54,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -97,9 +103,11 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -107,25 +115,26 @@
   
   
   
+  
     
     
       
     
     
-    <img src="../static/logo.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../static/logo.png" class="logo__image only-light" alt="Spark NLP 6.4.2 documentation - Home"/>
+    <script>document.write(`<img src="../static/logo.png" class="logo__image only-dark" alt="Spark NLP 6.4.2 documentation - Home"/>`);</script>
   
   
 </a></div>
     
   </div>
   
-  
   <div class="col-lg-9 navbar-header-items">
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -171,23 +180,27 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
         <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -198,13 +211,16 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
@@ -225,7 +241,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -271,12 +288,13 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -309,15 +327,15 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../index.html" class="nav-link" aria-label="Home">
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page">Overview: module code</li>
+    <li class="breadcrumb-item active" aria-current="page">Overview:...</li>
   </ul>
 </nav>
 </div>
@@ -339,11 +357,13 @@ document.write(`
 <ul><li><a href="sparknlp/annotation.html">sparknlp.annotation</a></li>
 <li><a href="sparknlp/annotation_audio.html">sparknlp.annotation_audio</a></li>
 <li><a href="sparknlp/annotation_image.html">sparknlp.annotation_image</a></li>
-<li><a href="sparknlp/annotator/audio/hubert_for_ctc.html">sparknlp.annotator.audio.hubert_for_ctc</a></li>
+<li><a href="sparknlp/annotator.html">sparknlp.annotator</a></li>
+<ul><li><a href="sparknlp/annotator/audio/hubert_for_ctc.html">sparknlp.annotator.audio.hubert_for_ctc</a></li>
 <li><a href="sparknlp/annotator/audio/wav2vec2_for_ctc.html">sparknlp.annotator.audio.wav2vec2_for_ctc</a></li>
 <li><a href="sparknlp/annotator/audio/whisper_for_ctc.html">sparknlp.annotator.audio.whisper_for_ctc</a></li>
 <li><a href="sparknlp/annotator/chunk2_doc.html">sparknlp.annotator.chunk2_doc</a></li>
 <li><a href="sparknlp/annotator/chunker.html">sparknlp.annotator.chunker</a></li>
+<li><a href="sparknlp/annotator/classifier_dl/albert_for_multiple_choice.html">sparknlp.annotator.classifier_dl.albert_for_multiple_choice</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/albert_for_question_answering.html">sparknlp.annotator.classifier_dl.albert_for_question_answering</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/albert_for_sequence_classification.html">sparknlp.annotator.classifier_dl.albert_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/albert_for_token_classification.html">sparknlp.annotator.classifier_dl.albert_for_token_classification</a></li>
@@ -367,6 +387,7 @@ document.write(`
 <li><a href="sparknlp/annotator/classifier_dl/distil_bert_for_sequence_classification.html">sparknlp.annotator.classifier_dl.distil_bert_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/distil_bert_for_token_classification.html">sparknlp.annotator.classifier_dl.distil_bert_for_token_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/distil_bert_for_zero_shot_classification.html">sparknlp.annotator.classifier_dl.distil_bert_for_zero_shot_classification</a></li>
+<li><a href="sparknlp/annotator/classifier_dl/distilbert_for_multiple_choice.html">sparknlp.annotator.classifier_dl.distilbert_for_multiple_choice</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/longformer_for_question_answering.html">sparknlp.annotator.classifier_dl.longformer_for_question_answering</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/longformer_for_sequence_classification.html">sparknlp.annotator.classifier_dl.longformer_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/longformer_for_token_classification.html">sparknlp.annotator.classifier_dl.longformer_for_token_classification</a></li>
@@ -374,44 +395,67 @@ document.write(`
 <li><a href="sparknlp/annotator/classifier_dl/mpnet_for_sequence_classification.html">sparknlp.annotator.classifier_dl.mpnet_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/mpnet_for_token_classification.html">sparknlp.annotator.classifier_dl.mpnet_for_token_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/multi_classifier_dl.html">sparknlp.annotator.classifier_dl.multi_classifier_dl</a></li>
+<li><a href="sparknlp/annotator/classifier_dl/roberta_for_multiple_choice.html">sparknlp.annotator.classifier_dl.roberta_for_multiple_choice</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/roberta_for_question_answering.html">sparknlp.annotator.classifier_dl.roberta_for_question_answering</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/roberta_for_sequence_classification.html">sparknlp.annotator.classifier_dl.roberta_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/roberta_for_token_classification.html">sparknlp.annotator.classifier_dl.roberta_for_token_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/roberta_for_zero_shot_classification.html">sparknlp.annotator.classifier_dl.roberta_for_zero_shot_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/sentiment_dl.html">sparknlp.annotator.classifier_dl.sentiment_dl</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/tapas_for_question_answering.html">sparknlp.annotator.classifier_dl.tapas_for_question_answering</a></li>
+<li><a href="sparknlp/annotator/classifier_dl/xlm_roberta_for_multiple_choice.html">sparknlp.annotator.classifier_dl.xlm_roberta_for_multiple_choice</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/xlm_roberta_for_question_answering.html">sparknlp.annotator.classifier_dl.xlm_roberta_for_question_answering</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/xlm_roberta_for_sequence_classification.html">sparknlp.annotator.classifier_dl.xlm_roberta_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/xlm_roberta_for_token_classification.html">sparknlp.annotator.classifier_dl.xlm_roberta_for_token_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/xlm_roberta_for_zero_shot_classification.html">sparknlp.annotator.classifier_dl.xlm_roberta_for_zero_shot_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/xlnet_for_sequence_classification.html">sparknlp.annotator.classifier_dl.xlnet_for_sequence_classification</a></li>
 <li><a href="sparknlp/annotator/classifier_dl/xlnet_for_token_classification.html">sparknlp.annotator.classifier_dl.xlnet_for_token_classification</a></li>
+<li><a href="sparknlp/annotator/cleaners/cleaner.html">sparknlp.annotator.cleaners.cleaner</a></li>
+<li><a href="sparknlp/annotator/cleaners/extractor.html">sparknlp.annotator.cleaners.extractor</a></li>
 <li><a href="sparknlp/annotator/coref/spanbert_coref.html">sparknlp.annotator.coref.spanbert_coref</a></li>
+<li><a href="sparknlp/annotator/cv/blip_for_question_answering.html">sparknlp.annotator.cv.blip_for_question_answering</a></li>
 <li><a href="sparknlp/annotator/cv/clip_for_zero_shot_classification.html">sparknlp.annotator.cv.clip_for_zero_shot_classification</a></li>
 <li><a href="sparknlp/annotator/cv/convnext_for_image_classification.html">sparknlp.annotator.cv.convnext_for_image_classification</a></li>
+<li><a href="sparknlp/annotator/cv/florence2_transformer.html">sparknlp.annotator.cv.florence2_transformer</a></li>
+<li><a href="sparknlp/annotator/cv/gemma3_for_multimodal.html">sparknlp.annotator.cv.gemma3_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/internvl_for_multimodal.html">sparknlp.annotator.cv.internvl_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/janus_for_multimodal.html">sparknlp.annotator.cv.janus_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/llava_for_multimodal.html">sparknlp.annotator.cv.llava_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/mllama_for_multimodal.html">sparknlp.annotator.cv.mllama_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/paligemma_for_multimodal.html">sparknlp.annotator.cv.paligemma_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/phi3_vision_for_multimodal.html">sparknlp.annotator.cv.phi3_vision_for_multimodal</a></li>
+<li><a href="sparknlp/annotator/cv/qwen2vl_transformer.html">sparknlp.annotator.cv.qwen2vl_transformer</a></li>
+<li><a href="sparknlp/annotator/cv/smolvlm_transformer.html">sparknlp.annotator.cv.smolvlm_transformer</a></li>
 <li><a href="sparknlp/annotator/cv/swin_for_image_classification.html">sparknlp.annotator.cv.swin_for_image_classification</a></li>
 <li><a href="sparknlp/annotator/cv/vision_encoder_decoder_for_image_captioning.html">sparknlp.annotator.cv.vision_encoder_decoder_for_image_captioning</a></li>
 <li><a href="sparknlp/annotator/cv/vit_for_image_classification.html">sparknlp.annotator.cv.vit_for_image_classification</a></li>
+<li><a href="sparknlp/annotator/dataframe_optimizer.html">sparknlp.annotator.dataframe_optimizer</a></li>
 <li><a href="sparknlp/annotator/date2_chunk.html">sparknlp.annotator.date2_chunk</a></li>
 <li><a href="sparknlp/annotator/dependency/dependency_parser.html">sparknlp.annotator.dependency.dependency_parser</a></li>
 <li><a href="sparknlp/annotator/dependency/typed_dependency_parser.html">sparknlp.annotator.dependency.typed_dependency_parser</a></li>
 <li><a href="sparknlp/annotator/document_character_text_splitter.html">sparknlp.annotator.document_character_text_splitter</a></li>
 <li><a href="sparknlp/annotator/document_normalizer.html">sparknlp.annotator.document_normalizer</a></li>
+<li><a href="sparknlp/annotator/document_title_splitter.html">sparknlp.annotator.document_title_splitter</a></li>
 <li><a href="sparknlp/annotator/document_token_splitter.html">sparknlp.annotator.document_token_splitter</a></li>
 <li><a href="sparknlp/annotator/document_token_splitter_test.html">sparknlp.annotator.document_token_splitter_test</a></li>
 <li><a href="sparknlp/annotator/embeddings/albert_embeddings.html">sparknlp.annotator.embeddings.albert_embeddings</a></li>
+<li><a href="sparknlp/annotator/embeddings/auto_gguf_embeddings.html">sparknlp.annotator.embeddings.auto_gguf_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/bert_embeddings.html">sparknlp.annotator.embeddings.bert_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/bert_sentence_embeddings.html">sparknlp.annotator.embeddings.bert_sentence_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/bge_embeddings.html">sparknlp.annotator.embeddings.bge_embeddings</a></li>
+<li><a href="sparknlp/annotator/embeddings/bi_encoder_multimodal_embeddings.html">sparknlp.annotator.embeddings.bi_encoder_multimodal_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/camembert_embeddings.html">sparknlp.annotator.embeddings.camembert_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/chunk_embeddings.html">sparknlp.annotator.embeddings.chunk_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/deberta_embeddings.html">sparknlp.annotator.embeddings.deberta_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/distil_bert_embeddings.html">sparknlp.annotator.embeddings.distil_bert_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/doc2vec.html">sparknlp.annotator.embeddings.doc2vec</a></li>
 <li><a href="sparknlp/annotator/embeddings/e5_embeddings.html">sparknlp.annotator.embeddings.e5_embeddings</a></li>
+<li><a href="sparknlp/annotator/embeddings/e5v_embeddings.html">sparknlp.annotator.embeddings.e5v_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/elmo_embeddings.html">sparknlp.annotator.embeddings.elmo_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/instructor_embeddings.html">sparknlp.annotator.embeddings.instructor_embeddings</a></li>
+<li><a href="sparknlp/annotator/embeddings/late_chunk_embeddings.html">sparknlp.annotator.embeddings.late_chunk_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/longformer_embeddings.html">sparknlp.annotator.embeddings.longformer_embeddings</a></li>
+<li><a href="sparknlp/annotator/embeddings/minilm_embeddings.html">sparknlp.annotator.embeddings.minilm_embeddings</a></li>
+<li><a href="sparknlp/annotator/embeddings/modernbert_embeddings.html">sparknlp.annotator.embeddings.modernbert_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/mpnet_embeddings.html">sparknlp.annotator.embeddings.mpnet_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/mxbai_embeddings.html">sparknlp.annotator.embeddings.mxbai_embeddings</a></li>
 <li><a href="sparknlp/annotator/embeddings/nomic_embeddings.html">sparknlp.annotator.embeddings.nomic_embeddings</a></li>
@@ -437,10 +481,12 @@ document.write(`
 <li><a href="sparknlp/annotator/matcher/regex_matcher.html">sparknlp.annotator.matcher.regex_matcher</a></li>
 <li><a href="sparknlp/annotator/matcher/text_matcher.html">sparknlp.annotator.matcher.text_matcher</a></li>
 <li><a href="sparknlp/annotator/n_gram_generator.html">sparknlp.annotator.n_gram_generator</a></li>
+<li><a href="sparknlp/annotator/ner/llm_entity_extractor.html">sparknlp.annotator.ner.llm_entity_extractor</a></li>
 <li><a href="sparknlp/annotator/ner/ner_approach.html">sparknlp.annotator.ner.ner_approach</a></li>
 <li><a href="sparknlp/annotator/ner/ner_converter.html">sparknlp.annotator.ner.ner_converter</a></li>
 <li><a href="sparknlp/annotator/ner/ner_crf.html">sparknlp.annotator.ner.ner_crf</a></li>
 <li><a href="sparknlp/annotator/ner/ner_dl.html">sparknlp.annotator.ner.ner_dl</a></li>
+<li><a href="sparknlp/annotator/ner/ner_dl_graph_checker.html">sparknlp.annotator.ner.ner_dl_graph_checker</a></li>
 <li><a href="sparknlp/annotator/ner/ner_overwriter.html">sparknlp.annotator.ner.ner_overwriter</a></li>
 <li><a href="sparknlp/annotator/ner/zero_shot_ner_model.html">sparknlp.annotator.ner.zero_shot_ner_model</a></li>
 <li><a href="sparknlp/annotator/normalizer.html">sparknlp.annotator.normalizer</a></li>
@@ -451,10 +497,14 @@ document.write(`
 <li><a href="sparknlp/annotator/pos/perceptron.html">sparknlp.annotator.pos.perceptron</a></li>
 <li><a href="sparknlp/annotator/sentence/sentence_detector.html">sparknlp.annotator.sentence.sentence_detector</a></li>
 <li><a href="sparknlp/annotator/sentence/sentence_detector_dl.html">sparknlp.annotator.sentence.sentence_detector_dl</a></li>
+<li><a href="sparknlp/annotator/sentence/sentence_detector_sat.html">sparknlp.annotator.sentence.sentence_detector_sat</a></li>
 <li><a href="sparknlp/annotator/sentiment/sentiment_detector.html">sparknlp.annotator.sentiment.sentiment_detector</a></li>
 <li><a href="sparknlp/annotator/sentiment/vivekn_sentiment.html">sparknlp.annotator.sentiment.vivekn_sentiment</a></li>
 <li><a href="sparknlp/annotator/seq2seq/auto_gguf_model.html">sparknlp.annotator.seq2seq.auto_gguf_model</a></li>
+<li><a href="sparknlp/annotator/seq2seq/auto_gguf_reranker.html">sparknlp.annotator.seq2seq.auto_gguf_reranker</a></li>
+<li><a href="sparknlp/annotator/seq2seq/auto_gguf_vision_model.html">sparknlp.annotator.seq2seq.auto_gguf_vision_model</a></li>
 <li><a href="sparknlp/annotator/seq2seq/bart_transformer.html">sparknlp.annotator.seq2seq.bart_transformer</a></li>
+<li><a href="sparknlp/annotator/seq2seq/cohere_transformer.html">sparknlp.annotator.seq2seq.cohere_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/cpm_transformer.html">sparknlp.annotator.seq2seq.cpm_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/gpt2_transformer.html">sparknlp.annotator.seq2seq.gpt2_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/llama2_transformer.html">sparknlp.annotator.seq2seq.llama2_transformer</a></li>
@@ -463,11 +513,14 @@ document.write(`
 <li><a href="sparknlp/annotator/seq2seq/marian_transformer.html">sparknlp.annotator.seq2seq.marian_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/mistral_transformer.html">sparknlp.annotator.seq2seq.mistral_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/nllb_transformer.html">sparknlp.annotator.seq2seq.nllb_transformer</a></li>
+<li><a href="sparknlp/annotator/seq2seq/olmo_transformer.html">sparknlp.annotator.seq2seq.olmo_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/phi2_transformer.html">sparknlp.annotator.seq2seq.phi2_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/phi3_transformer.html">sparknlp.annotator.seq2seq.phi3_transformer</a></li>
+<li><a href="sparknlp/annotator/seq2seq/phi4_transformer.html">sparknlp.annotator.seq2seq.phi4_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/qwen_transformer.html">sparknlp.annotator.seq2seq.qwen_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/starcoder_transformer.html">sparknlp.annotator.seq2seq.starcoder_transformer</a></li>
 <li><a href="sparknlp/annotator/seq2seq/t5_transformer.html">sparknlp.annotator.seq2seq.t5_transformer</a></li>
+<li><a href="sparknlp/annotator/similarity/bm25.html">sparknlp.annotator.similarity.bm25</a></li>
 <li><a href="sparknlp/annotator/similarity/document_similarity_ranker.html">sparknlp.annotator.similarity.document_similarity_ranker</a></li>
 <li><a href="sparknlp/annotator/spell_check/context_spell_checker.html">sparknlp.annotator.spell_check.context_spell_checker</a></li>
 <li><a href="sparknlp/annotator/spell_check/norvig_sweeting.html">sparknlp.annotator.spell_check.norvig_sweeting</a></li>
@@ -480,17 +533,20 @@ document.write(`
 <li><a href="sparknlp/annotator/token/regex_tokenizer.html">sparknlp.annotator.token.regex_tokenizer</a></li>
 <li><a href="sparknlp/annotator/token/tokenizer.html">sparknlp.annotator.token.tokenizer</a></li>
 <li><a href="sparknlp/annotator/token2_chunk.html">sparknlp.annotator.token2_chunk</a></li>
+<li><a href="sparknlp/annotator/vector_db/vector_db_connector.html">sparknlp.annotator.vector_db.vector_db_connector</a></li>
 <li><a href="sparknlp/annotator/ws/word_segmenter.html">sparknlp.annotator.ws.word_segmenter</a></li>
-<li><a href="sparknlp/base/audio_assembler.html">sparknlp.base.audio_assembler</a></li>
+</ul><li><a href="sparknlp/base/audio_assembler.html">sparknlp.base.audio_assembler</a></li>
 <li><a href="sparknlp/base/doc2_chunk.html">sparknlp.base.doc2_chunk</a></li>
 <li><a href="sparknlp/base/document_assembler.html">sparknlp.base.document_assembler</a></li>
 <li><a href="sparknlp/base/embeddings_finisher.html">sparknlp.base.embeddings_finisher</a></li>
 <li><a href="sparknlp/base/finisher.html">sparknlp.base.finisher</a></li>
+<li><a href="sparknlp/base/gguf_ranking_finisher.html">sparknlp.base.gguf_ranking_finisher</a></li>
 <li><a href="sparknlp/base/graph_finisher.html">sparknlp.base.graph_finisher</a></li>
 <li><a href="sparknlp/base/has_recursive_fit.html">sparknlp.base.has_recursive_fit</a></li>
 <li><a href="sparknlp/base/has_recursive_transform.html">sparknlp.base.has_recursive_transform</a></li>
 <li><a href="sparknlp/base/image_assembler.html">sparknlp.base.image_assembler</a></li>
 <li><a href="sparknlp/base/light_pipeline.html">sparknlp.base.light_pipeline</a></li>
+<li><a href="sparknlp/base/multi_column_assembler.html">sparknlp.base.multi_column_assembler</a></li>
 <li><a href="sparknlp/base/multi_document_assembler.html">sparknlp.base.multi_document_assembler</a></li>
 <li><a href="sparknlp/base/prompt_assembler.html">sparknlp.base.prompt_assembler</a></li>
 <li><a href="sparknlp/base/recursive_pipeline.html">sparknlp.base.recursive_pipeline</a></li>
@@ -499,10 +555,14 @@ document.write(`
 <li><a href="sparknlp/common/annotator_approach.html">sparknlp.common.annotator_approach</a></li>
 <li><a href="sparknlp/common/annotator_model.html">sparknlp.common.annotator_model</a></li>
 <li><a href="sparknlp/common/annotator_properties.html">sparknlp.common.annotator_properties</a></li>
+<li><a href="sparknlp/common/annotator_type.html">sparknlp.common.annotator_type</a></li>
+<li><a href="sparknlp/common/completion_post_processing.html">sparknlp.common.completion_post_processing</a></li>
+<li><a href="sparknlp/common/coverage_result.html">sparknlp.common.coverage_result</a></li>
 <li><a href="sparknlp/common/match_strategy.html">sparknlp.common.match_strategy</a></li>
 <li><a href="sparknlp/common/properties.html">sparknlp.common.properties</a></li>
 <li><a href="sparknlp/common/read_as.html">sparknlp.common.read_as</a></li>
 <li><a href="sparknlp/common/recursive_annotator_approach.html">sparknlp.common.recursive_annotator_approach</a></li>
+<li><a href="sparknlp/common/storage.html">sparknlp.common.storage</a></li>
 <li><a href="sparknlp/common/utils.html">sparknlp.common.utils</a></li>
 <li><a href="sparknlp/functions.html">sparknlp.functions</a></li>
 <li><a href="sparknlp/internal/annotator_java_ml.html">sparknlp.internal.annotator_java_ml</a></li>
@@ -511,29 +571,41 @@ document.write(`
 <li><a href="sparknlp/internal/params_getters_setters.html">sparknlp.internal.params_getters_setters</a></li>
 <li><a href="sparknlp/internal/recursive.html">sparknlp.internal.recursive</a></li>
 <li><a href="sparknlp/logging/comet.html">sparknlp.logging.comet</a></li>
+<li><a href="sparknlp/partition/partition.html">sparknlp.partition.partition</a></li>
+<li><a href="sparknlp/partition/partition_properties.html">sparknlp.partition.partition_properties</a></li>
+<li><a href="sparknlp/partition/partition_transformer.html">sparknlp.partition.partition_transformer</a></li>
 <li><a href="sparknlp/pretrained/pretrained_pipeline.html">sparknlp.pretrained.pretrained_pipeline</a></li>
 <li><a href="sparknlp/pretrained/resource_downloader.html">sparknlp.pretrained.resource_downloader</a></li>
+<li><a href="sparknlp/pretrained/utils.html">sparknlp.pretrained.utils</a></li>
+<li><a href="sparknlp/reader/enums.html">sparknlp.reader.enums</a></li>
+<li><a href="sparknlp/reader/layout_aligner_for_text.html">sparknlp.reader.layout_aligner_for_text</a></li>
+<li><a href="sparknlp/reader/layout_aligner_for_vision.html">sparknlp.reader.layout_aligner_for_vision</a></li>
+<li><a href="sparknlp/reader/pdf_to_text.html">sparknlp.reader.pdf_to_text</a></li>
+<li><a href="sparknlp/reader/reader2doc.html">sparknlp.reader.reader2doc</a></li>
+<li><a href="sparknlp/reader/reader2image.html">sparknlp.reader.reader2image</a></li>
+<li><a href="sparknlp/reader/reader2table.html">sparknlp.reader.reader2table</a></li>
+<li><a href="sparknlp/reader/reader_assembler.html">sparknlp.reader.reader_assembler</a></li>
+<li><a href="sparknlp/reader/sparknlp_reader.html">sparknlp.reader.sparknlp_reader</a></li>
 <li><a href="sparknlp/training/conll.html">sparknlp.training.conll</a></li>
 <li><a href="sparknlp/training/conllu.html">sparknlp.training.conllu</a></li>
 <li><a href="sparknlp/training/pos.html">sparknlp.training.pos</a></li>
 <li><a href="sparknlp/training/pub_tator.html">sparknlp.training.pub_tator</a></li>
 <li><a href="sparknlp/training/spacy_to_annotation.html">sparknlp.training.spacy_to_annotation</a></li>
+<li><a href="sparknlp/training/tfgraphs.html">sparknlp.training.tfgraphs</a></li>
+<li><a href="sparknlp/upload_to_hub.html">sparknlp.upload_to_hub</a></li>
+<li><a href="sparknlp/util.html">sparknlp.util</a></li>
 </ul></ul>
 
                 </article>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -551,8 +623,8 @@ document.write(`
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -560,17 +632,19 @@ document.write(`
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, John Snow Labs.
+      © Copyright 2026 John Snow Labs.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
     <br/>
   </p>
 </div>
@@ -578,10 +652,12 @@ document.write(`
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
 </p></div>
       
     </div>

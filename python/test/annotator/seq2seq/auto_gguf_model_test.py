@@ -17,7 +17,7 @@ import pytest
 
 from sparknlp.annotator import *
 from sparknlp.base import *
-from test.util import SparkContextForTest
+from test.util import *
 
 
 @pytest.mark.slow
@@ -49,7 +49,7 @@ class AutoGGUFModelTestSpec(unittest.TestCase):
             .setOutputCol("completions")
             .setBatchSize(4)
             .setNPredict(20)
-            .setNGpuLayers(5)
+            .setNGpuLayers(99)
             .setTemperature(0.4)
             .setTopK(40)
             .setTopP(0.9)
@@ -78,7 +78,7 @@ class AutoGGUFModelParametersTestSpec(unittest.TestCase):
             DocumentAssembler().setInputCol("text").setOutputCol("document")
         )
 
-        model = (
+        model: AutoGGUFModel = (
             AutoGGUFModel.pretrained()
             .setInputCols("document")
             .setOutputCol("completions")
@@ -87,24 +87,23 @@ class AutoGGUFModelParametersTestSpec(unittest.TestCase):
 
         # Model Parameters
         model.setNThreads(8)
-        model.setNThreadsDraft(8)
+        # model.setNThreadsDraft(8)
         model.setNThreadsBatch(8)
-        model.setNThreadsBatchDraft(8)
+        # model.setNThreadsBatchDraft(8)
         model.setNCtx(512)
         model.setNBatch(32)
         model.setNUbatch(32)
         model.setNDraft(5)
-        model.setNChunks(-1)
-        model.setNSequences(1)
-        model.setPSplit(0.1)
+        # model.setNChunks(-1)
+        # model.setNSequences(1)
+        # model.setPSplit(0.1)
         model.setNGpuLayers(99)
         model.setNGpuLayersDraft(99)
         model.setGpuSplitMode("NONE")
         model.setMainGpu(0)
-        model.setTensorSplit([])
-        model.setNBeams(0)
-        model.setGrpAttnN(1)
-        model.setGrpAttnW(512)
+        # model.setTensorSplit([])
+        # model.setGrpAttnN(1)
+        # model.setGrpAttnW(512)
         model.setRopeFreqBase(1.0)
         model.setRopeFreqScale(1.0)
         model.setYarnExtFactor(1.0)
@@ -114,15 +113,14 @@ class AutoGGUFModelParametersTestSpec(unittest.TestCase):
         model.setYarnOrigCtx(0)
         model.setDefragmentationThreshold(-1.0)
         model.setNumaStrategy("DISTRIBUTE")
-        model.setRopeScalingType("UNSPECIFIED")
-        model.setPoolingType("UNSPECIFIED")
+        model.setRopeScalingType("NONE")
+        model.setPoolingType("NONE")
         model.setModelDraft("")
-        model.setLookupCacheStaticFilePath("/tmp/sparknlp-llama-cpp-cache")
-        model.setLookupCacheDynamicFilePath("/tmp/sparknlp-llama-cpp-cache")
-        model.setLoraBase("")
-        model.setEmbedding(False)
+        # model.setLookupCacheStaticFilePath("/tmp/sparknlp-llama-cpp-cache")
+        # model.setLookupCacheDynamicFilePath("/tmp/sparknlp-llama-cpp-cache")
+        # model.setEmbedding(False)
         model.setFlashAttention(False)
-        model.setInputPrefixBos(False)
+        # model.setInputPrefixBos(False)
         model.setUseMmap(False)
         model.setUseMlock(False)
         model.setNoKvOffload(False)
@@ -166,11 +164,15 @@ class AutoGGUFModelParametersTestSpec(unittest.TestCase):
         # Special PySpark Parameters (Scala StructFeatures)
         model.setTokenIdBias({0: 0.0, 1: 0.0})
         model.setTokenBias({"!": 0.0, "?": 0.0})
-        model.setLoraAdapters({" ": 0.0})
+        # model.setLoraAdapters({" ": 0.0})
+
+        model.setLogVerbosity(0)
+        model.setDisableLog(True)
 
         pipeline = Pipeline().setStages([document_assembler, model])
         results = pipeline.fit(data).transform(data)
 
+        # Can fail due to bogus parameters, but at least we are testing the setters
         results.select("completions").show(truncate=False)
 
 
@@ -189,3 +191,141 @@ class AutoGGUFModelMetadataTestSpec(unittest.TestCase):
         metadata = model.getMetadata()
         assert len(metadata) > 0
         print(eval(metadata))
+
+
+@pytest.mark.slow
+class AutoGGUFModelErrorMessagesTestSpec(unittest.TestCase):
+    def setUp(self):
+        self.spark = SparkContextForTest.spark
+        self.data = (
+            self.spark.createDataFrame(
+                [
+                    ["The moons of Jupiter are "],
+                    ["Earth is "],
+                    ["The moon is "],
+                    ["The sun is "],
+                ]
+            )
+            .toDF("text")
+            .repartition(1)
+        )
+
+        self.document_assembler = (
+            DocumentAssembler().setInputCol("text").setOutputCol("document")
+        )
+
+    def runTest(self):
+        model = (
+            AutoGGUFModel.pretrained()
+            .setInputCols("document")
+            .setOutputCol("completions")
+            .setGrammar("root ::= (")  # Invalid grammar
+        )
+
+        pipeline = Pipeline().setStages([self.document_assembler, model])
+        result = pipeline.fit(self.data).transform(self.data)
+
+        collected = result.select("completions").collect()
+
+        self.assertEqual(
+            len(collected), self.data.count(), "Should return the same number of rows"
+        )
+        for row in collected:
+            annotation = row[0][0]
+            self.assertEqual(annotation["result"], "", "Completions should be empty")
+            self.assertIn(
+                "llamacpp_exception",
+                annotation["metadata"],
+                "llamacpp_exception should be present",
+            )
+
+
+@pytest.mark.slow
+class AutoGGUFModelSerializationTestSpec(unittest.TestCase):
+    def setUp(self):
+        self.spark = SparkContextForTest.spark
+
+    def runTest(self):
+        model_path = "/tmp/autogguf_spark_nlp"
+        model_writer = (
+            AutoGGUFModel.pretrained()
+            .setInputCols("document")
+            .setOutputCol("completions")
+            .write()
+            .overwrite()
+        )
+        model_writer.save(model_path)
+        AutoGGUFModel.load(model_path)
+
+        model_path = "file:///tmp/autogguf_spark_nlp"
+        AutoGGUFModel.load(model_path)
+
+
+@pytest.mark.slow
+class AutoGGUFModelCloseTest(unittest.TestCase):
+    def setUp(self):
+        self.spark = SparkSessionForTest.spark
+
+        self.data = self.spark.createDataFrame(
+            [
+                ["The moons of Jupiter are "],
+                ["Earth is "],
+                ["The moon is "],
+                ["The sun is "],
+            ]
+        ).toDF("text")
+
+        self.document_assembler = (
+            DocumentAssembler().setInputCol("text").setOutputCol("document")
+        )
+
+    def runTest(self):
+        model = (
+            AutoGGUFModel.pretrained()
+            .setInputCols("document")
+            .setOutputCol("completions")
+        )
+
+        pipeline = Pipeline().setStages([self.document_assembler, model])
+        pipeline.fit(self.data).transform(self.data).show()
+
+        ramChange = measureRAMChange(lambda: model.close())
+
+        print(f"Freed RAM after closing the model: {ramChange} MB")
+        assert ramChange < -100, "Freed RAM should be greater than 100 MB"
+
+
+@pytest.mark.slow
+class AutoGGUFModelThinkingTagTestSpec(unittest.TestCase):
+    def setUp(self):
+        self.spark = SparkContextForTest.spark
+
+    def runTest(self):
+        document_assembler = (
+            DocumentAssembler().setInputCol("text").setOutputCol("document")
+        )
+
+        think_tag = "think"
+
+        model = (
+            AutoGGUFModel.loadSavedModel("models/Qwen3-8B-Q4_K_M.gguf", self.spark)
+            .setInputCols(["document"])
+            .setOutputCol("completions")
+            .setRemoveThinkingTag(think_tag)
+            .setNPredict(500)
+            .setTemperature(0.1)
+        )
+
+        data = self.spark.createDataFrame(
+            [("What is the meaning of life? Think shortly step by step.",)], ["text"]
+        )
+
+        pipeline = Pipeline(stages=[document_assembler, model])
+        result = pipeline.fit(data).transform(data)
+
+        completions = result.select("completions").collect()
+        completion = completions[0][0][0].result
+
+        print(completion)
+        assert f"<{think_tag}>" not in completion
+        assert f"</{think_tag}>" not in completion

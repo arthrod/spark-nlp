@@ -59,9 +59,9 @@ abstract class AnnotatorModel[M <: Model[M]] extends RawAnnotator[M] with CanBeL
               this match {
                 case a: HasRecursiveTransform[M] =>
                   a.dfRecAnnotate(recursivePipeline.get)(
-                    array(getInputCols.map(c => dataset.col(c)): _*))
+                    array(getInputCols.map(c => inputDataset.col(c)): _*))
                 case _ =>
-                  withAnnotate.dfAnnotate(array(getInputCols.map(c => dataset.col(c)): _*))
+                  withAnnotate.dfAnnotate(array(getInputCols.map(c => inputDataset.col(c)): _*))
               }
             }))
         case withBatchAnnotate: HasBatchedAnnotate[M] =>
@@ -103,6 +103,23 @@ abstract class AnnotatorModel[M <: Model[M]] extends RawAnnotator[M] with CanBeL
             withBatchAnnotateAudio.batchProcess(partition)
           })
 
+          /** Put back column metadata from `inputDataset` after destructive mapPartitions */
+          val dfWithMetadata = inputDataset.schema.fields
+            .foldLeft(processedDataFrame)((dataFrame, field) => {
+              dataFrame
+                .withColumn(field.name, dataFrame.col(field.name).as(field.name, field.metadata))
+            })
+            .withColumn(getOutputCol, wrapColumnMetadata(col(getOutputCol)))
+          dfWithMetadata
+
+        case withBatchAnnotateTextImage: HasBatchedAnnotateTextImage[M] =>
+          implicit val encoder: ExpressionEncoder[Row] =
+            SparkNlpConfig.getEncoder(inputDataset, newStructType)
+          val processedDataFrame = inputDataset.mapPartitions(partition => {
+            withBatchAnnotateTextImage.batchProcess(partition)
+          })
+
+          // TODO: Do we really need to repeat this in every case?
           /** Put back column metadata from `inputDataset` after destructive mapPartitions */
           val dfWithMetadata = inputDataset.schema.fields
             .foldLeft(processedDataFrame)((dataFrame, field) => {

@@ -176,6 +176,7 @@ object ResourceHelper {
 
     def close(): Unit = {
       openBuffers.foreach(_.close())
+      fileSystem.foreach(_.close())
       pipe.foreach(_.close)
     }
   }
@@ -209,7 +210,9 @@ object ResourceHelper {
         val pathWithProtocol: String =
           if (URI.create(path).getScheme == null) new File(path).toURI.toURL.toString else path
         val resource = SourceStream(pathWithProtocol)
-        resource.copyToLocal()
+        val localTmpPath = resource.copyToLocal()
+        resource.close()
+        localTmpPath
       }
 
     new File(localUri).getAbsolutePath // Platform independent path
@@ -696,8 +699,11 @@ object ResourceHelper {
   }
 
   def validFile(path: String): Boolean = {
-
     if (path.isEmpty) return false
+
+    if (path.contains(",")) {
+      return path.split(",").map(_.trim).forall(p => validFile(p))
+    }
 
     var isValid = validLocalFile(path) match {
       case Success(value) => value
@@ -739,6 +745,39 @@ object ResourceHelper {
     try {
       new URI(url).parseServerAuthority()
       true
+    } catch {
+      case _: Exception => false
+    }
+  }
+
+  /** Get the Hadoop FileSystem from a given path
+    *
+    * @param path
+    *   Path to the resource
+    * @return
+    *   Hadoop FileSystem
+    */
+  def fileSystemFromPath(path: String): FileSystem = {
+    val uri = new URI(path.replaceAllLiterally("\\", "/"))
+    FileSystem.get(uri, spark.sparkContext.hadoopConfiguration)
+  }
+
+  /** Resolves the given path to its absolute form, handling different file systems.
+    *
+    * @param folder
+    *   The input path to resolve.
+    * @return
+    *   The resolved absolute path as a string.
+    */
+  def resolvePath(folder: String): String = {
+    val fileSystem: FileSystem = ResourceHelper.fileSystemFromPath(folder)
+    fileSystem.resolvePath(new Path(folder)).toString
+  }
+
+  def isHTTPProtocol(urlStr: String): Boolean = {
+    try {
+      val url = new URL(urlStr)
+      url.getProtocol == "http" || url.getProtocol == "https"
     } catch {
       case _: Exception => false
     }

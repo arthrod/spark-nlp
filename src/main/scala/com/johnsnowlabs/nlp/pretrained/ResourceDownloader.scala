@@ -24,11 +24,12 @@ import com.johnsnowlabs.nlp.annotators.cv._
 import com.johnsnowlabs.nlp.annotators.er.EntityRulerModel
 import com.johnsnowlabs.nlp.annotators.ld.dl.LanguageDetectorDL
 import com.johnsnowlabs.nlp.annotators.ner.crf.NerCrfModel
-import com.johnsnowlabs.nlp.annotators.ner.dl.{NerDLModel, ZeroShotNerModel}
+import com.johnsnowlabs.nlp.annotators.ner.dl.{LLMEntityExtractor, NerDLModel, ZeroShotNerModel}
 import com.johnsnowlabs.nlp.annotators.parser.dep.DependencyParserModel
 import com.johnsnowlabs.nlp.annotators.parser.typdep.TypedDependencyParserModel
 import com.johnsnowlabs.nlp.annotators.pos.perceptron.PerceptronModel
 import com.johnsnowlabs.nlp.annotators.sbd.pragmatic.SentenceDetector
+import com.johnsnowlabs.nlp.annotators.sbd.sat.SentenceDetectorSaTModel
 import com.johnsnowlabs.nlp.annotators.sda.pragmatic.SentimentDetectorModel
 import com.johnsnowlabs.nlp.annotators.sda.vivekn.ViveknSentimentModel
 import com.johnsnowlabs.nlp.annotators.sentence_detector_dl.SentenceDetectorDLModel
@@ -122,7 +123,7 @@ object ResourceDownloader {
 
   /** Reset the cache and recreate ResourceDownloader S3 credentials */
   def resetResourceDownloader(): Unit = {
-    cache.empty
+    cache.clear()
     this.privateDownloader = new S3ResourceDownloader(s3Bucket, s3Path, cacheFolder, "private")
   }
 
@@ -496,8 +497,20 @@ object ResourceDownloader {
       reader: DefaultParamsReadable[TModel],
       name: String,
       language: Option[String] = None,
-      folder: String = publicLoc): TModel = {
-    downloadModel(reader, ResourceRequest(name, language, folder))
+      folder: String = publicLoc,
+      preferredEngine: String = "onnx",
+      skipPreferredEngine: Boolean = false): TModel = {
+
+    val annotator = reader.getClass.getSimpleName.replace("$", "")
+    downloadModel(
+      reader,
+      ResourceRequest(
+        name,
+        language,
+        folder,
+        annotator = Some(annotator),
+        engine = Some(preferredEngine),
+        skipPreferredEngine = skipPreferredEngine))
   }
 
   def downloadModel[TModel <: PipelineStage](
@@ -517,7 +530,13 @@ object ResourceDownloader {
       name: String,
       language: Option[String] = None,
       folder: String = publicLoc): PipelineModel = {
-    downloadPipeline(ResourceRequest(name, language, folder))
+    downloadPipeline(
+      ResourceRequest(
+        name,
+        language,
+        folder,
+        annotator = Some("PipelineModel"),
+        skipPreferredEngine = true))
   }
 
   def downloadPipeline(request: ResourceRequest): PipelineModel = {
@@ -575,7 +594,10 @@ case class ResourceRequest(
     language: Option[String] = None,
     folder: String = ResourceDownloader.publicLoc,
     libVersion: Version = ResourceDownloader.libVersion,
-    sparkVersion: Version = ResourceDownloader.sparkVersion)
+    sparkVersion: Version = ResourceDownloader.sparkVersion,
+    annotator: Option[String] = None,
+    engine: Option[String] = None,
+    skipPreferredEngine: Boolean = false)
 
 /* convenience accessor for Py4J calls */
 object PythonResourceDownloader {
@@ -632,7 +654,6 @@ object PythonResourceDownloader {
     "XlnetForTokenClassification" -> XlnetForTokenClassification,
     "AlbertForSequenceClassification" -> AlbertForSequenceClassification,
     "BertForSequenceClassification" -> BertForSequenceClassification,
-    "DeBertaForSequenceClassification" -> DeBertaForSequenceClassification,
     "DistilBertForSequenceClassification" -> DistilBertForSequenceClassification,
     "LongformerForSequenceClassification" -> LongformerForSequenceClassification,
     "RoBertaForSequenceClassification" -> RoBertaForSequenceClassification,
@@ -644,7 +665,6 @@ object PythonResourceDownloader {
     "Word2VecModel" -> Word2VecModel,
     "DeBertaEmbeddings" -> DeBertaEmbeddings,
     "DeBertaForSequenceClassification" -> DeBertaForSequenceClassification,
-    "DeBertaForTokenClassification" -> DeBertaForTokenClassification,
     "CamemBertEmbeddings" -> CamemBertEmbeddings,
     "AlbertForQuestionAnswering" -> AlbertForQuestionAnswering,
     "BertForQuestionAnswering" -> BertForQuestionAnswering,
@@ -682,6 +702,7 @@ object PythonResourceDownloader {
     "MPNetForSequenceClassification" -> MPNetForSequenceClassification,
     "MPNetForQuestionAnswering" -> MPNetForQuestionAnswering,
     "LLAMA2Transformer" -> LLAMA2Transformer,
+    "LLAMA3Transformer" -> LLAMA3Transformer,
     "M2M100Transformer" -> M2M100Transformer,
     "UAEEmbeddings" -> UAEEmbeddings,
     "AutoGGUFModel" -> AutoGGUFModel,
@@ -690,7 +711,33 @@ object PythonResourceDownloader {
     "SnowFlakeEmbeddings" -> SnowFlakeEmbeddings,
     "CamemBertForZeroShotClassification" -> CamemBertForZeroShotClassification,
     "BertForMultipleChoice" -> BertForMultipleChoice,
-    "PromptAssembler" -> PromptAssembler)
+    "PromptAssembler" -> PromptAssembler,
+    "CPMTransformer" -> CPMTransformer,
+    "NomicEmbeddings" -> NomicEmbeddings,
+    "NLLBTransformer" -> NLLBTransformer,
+    "Phi3Transformer" -> Phi3Transformer,
+    "QwenTransformer" -> QwenTransformer,
+    "AutoGGUFEmbeddings" -> AutoGGUFEmbeddings,
+    "AutoGGUFVisionModel" -> AutoGGUFVisionModel,
+    "MLLamaForMultimodal" -> MLLamaForMultimodal,
+    "Qwen2VLTransformer" -> Qwen2VLTransformer,
+    "CoHereTransformer" -> CoHereTransformer,
+    "LLAVAForMultiModal" -> LLAVAForMultiModal,
+    "Phi3Vision" -> Phi3Vision,
+    "OLMoTransformer" -> OLMoTransformer,
+    "JanusForMultiModal" -> JanusForMultiModal,
+    "SmolVLMTransformer" -> SmolVLMTransformer,
+    "PaliGemmaForMultiModal" -> PaliGemmaForMultiModal,
+    "Gemma3ForMultiModal" -> Gemma3ForMultiModal,
+    "InternVLForMultiModal" -> InternVLForMultiModal,
+    "Florence2Transformer" -> Florence2Transformer,
+    "E5VEmbeddings" -> E5VEmbeddings,
+    "Phi4Transformer" -> Phi4Transformer,
+    "AutoGGUFReranker" -> AutoGGUFReranker,
+    "ModernBertEmbeddings" -> ModernBertEmbeddings,
+    "LLMEntityExtractor" -> LLMEntityExtractor,
+    "BiEncoderMultimodalEmbeddings" -> BiEncoderMultimodalEmbeddings,
+    "SentenceDetectorSaTModel" -> SentenceDetectorSaTModel)
 
   // List pairs of types such as the one with key type can load a pretrained model from the value type
   val typeMapper: Map[String, String] = Map("ZeroShotNerModel" -> "RoBertaForQuestionAnswering")
@@ -699,7 +746,9 @@ object PythonResourceDownloader {
       readerStr: String,
       name: String,
       language: String = null,
-      remoteLoc: String = null): PipelineStage = {
+      remoteLoc: String = null,
+      preferredEngine: String,
+      skipPreferredEngine: Boolean): PipelineStage = {
 
     val reader = keyToReader.getOrElse(
       if (typeMapper.contains(readerStr)) typeMapper(readerStr) else readerStr,
@@ -711,7 +760,9 @@ object PythonResourceDownloader {
       reader.asInstanceOf[DefaultParamsReadable[PipelineStage]],
       name,
       Option(language),
-      correctedFolder)
+      correctedFolder,
+      preferredEngine,
+      skipPreferredEngine)
 
     // Cast the model to the required type. This has to be done for each entry in the typeMapper map
     if (typeMapper.contains(readerStr) && readerStr == "ZeroShotNerModel")
@@ -777,8 +828,21 @@ object PythonResourceDownloader {
     ResourceDownloader.listAvailableAnnotators().mkString("\n")
   }
 
-  def getDownloadSize(name: String, language: String = "en", remoteLoc: String = null): String = {
+  def getDownloadSize(
+      name: String,
+      language: String = "en",
+      remoteLoc: String = null,
+      annotator: String,
+      engine: String,
+      skipPreferredEngine: Boolean): String = {
     val correctedFolder = Option(remoteLoc).getOrElse(ResourceDownloader.publicLoc)
-    ResourceDownloader.getDownloadSize(ResourceRequest(name, Option(language), correctedFolder))
+    ResourceDownloader.getDownloadSize(
+      ResourceRequest(
+        name,
+        Option(language),
+        correctedFolder,
+        annotator = Some(annotator),
+        engine = Option(engine),
+        skipPreferredEngine = skipPreferredEngine))
   }
 }

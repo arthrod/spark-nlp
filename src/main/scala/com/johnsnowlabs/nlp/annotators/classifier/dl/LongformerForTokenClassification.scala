@@ -18,6 +18,7 @@ package com.johnsnowlabs.nlp.annotators.classifier.dl
 
 import com.johnsnowlabs.ml.ai.RoBertaClassification
 import com.johnsnowlabs.ml.onnx.OnnxWrapper
+import com.johnsnowlabs.ml.openvino.OpenvinoWrapper
 import com.johnsnowlabs.ml.tensorflow._
 import com.johnsnowlabs.ml.util.LoadExternalModel.{
   loadTextAsset,
@@ -242,13 +243,15 @@ class LongformerForTokenClassification(override val uid: String)
   def setModelIfNotSet(
       spark: SparkSession,
       tensorflowWrapper: Option[TensorflowWrapper],
-      onnxWrapper: Option[OnnxWrapper]): LongformerForTokenClassification = {
+      onnxWrapper: Option[OnnxWrapper],
+      openvinoWrapper: Option[OpenvinoWrapper]): LongformerForTokenClassification = {
     if (_model.isEmpty) {
       _model = Some(
         spark.sparkContext.broadcast(
           new RoBertaClassification(
             tensorflowWrapper,
             onnxWrapper,
+            openvinoWrapper,
             sentenceStartTokenId,
             sentenceEndTokenId,
             padTokenId,
@@ -348,7 +351,7 @@ trait ReadLongformerForTokenDLModel extends ReadTensorflowModel {
 
     val tfWrapper =
       readTensorflowModel(path, spark, "_longformer_classification_tf", initAllTables = false)
-    instance.setModelIfNotSet(spark, Some(tfWrapper), None)
+    instance.setModelIfNotSet(spark, Some(tfWrapper), None, None)
   }
 
   addReader(readModel)
@@ -388,7 +391,7 @@ trait ReadLongformerForTokenDLModel extends ReadTensorflowModel {
           */
         annotatorModel
           .setSignatures(_signatures)
-          .setModelIfNotSet(spark, Some(tfWrapper), None)
+          .setModelIfNotSet(spark, Some(tfWrapper), None, None)
 
       case _ =>
         throw new Exception(notSupportedEngineError)

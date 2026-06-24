@@ -1,15 +1,14 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" >
+<html lang="en" data-content_root="" >
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>sparknlp &#8212; Spark NLP 5.5.1 documentation</title>
+    <title>sparknlp &#8212; Spark NLP 6.4.2 documentation</title>
   
   
   
@@ -19,33 +18,31 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../../../static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../../static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
-<link href="../../../static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../../static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../../../static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
 
   
-  <link href="../../../static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link href="../../../static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
   <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../../../static/css/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../static/css/custom.css?v=e1fb877f" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../static/scripts/bootstrap.js?digest=e353d410970836974a52" />
-<link rel="preload" as="script" href="../../../static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+  <link rel="preload" as="script" href="../../../static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../../../static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../../../static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js"></script>
-    <script src="../../../static/jquery.js"></script>
-    <script src="../../../static/underscore.js"></script>
-    <script src="../../../static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../static/doctools.js"></script>
-    <script src="../../../static/sphinx_highlight.js"></script>
-    <script src="../../../static/toggleprompt.js"></script>
+    <script data-url_root="../../../" id="documentation_options" src="../../../static/documentation_options.js?v=bf4b7637"></script>
+    <script src="../../../static/doctools.js?v=888ff710"></script>
+    <script src="../../../static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../static/toggleprompt.js?v=670350bf"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'reference/autosummary/sparknlp/index';</script>
-    <link rel="shortcut icon" href="../../../static/fav.ico"/>
+    <link rel="icon" href="../../../static/fav.ico"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -58,6 +55,15 @@
   
   
   <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
   
   <input type="checkbox"
           class="sidebar-toggle"
@@ -98,9 +104,11 @@
     <span class="fa-solid fa-bars"></span>
   </label>
   
-  <div class="navbar-header-items__start">
+  
+  <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../../../index.html">
@@ -108,25 +116,26 @@
   
   
   
+  
     
     
       
     
     
-    <img src="../../../static/logo.png" class="logo__image only-light" alt="Logo image"/>
-    <script>document.write(`<img src="../../../static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+    <img src="../../../static/logo.png" class="logo__image only-light" alt="Spark NLP 6.4.2 documentation - Home"/>
+    <script>document.write(`<img src="../../../static/logo.png" class="logo__image only-dark" alt="Spark NLP 6.4.2 documentation - Home"/>`);</script>
   
   
 </a></div>
     
   </div>
   
-  
   <div class="col-lg-9 navbar-header-items">
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -172,23 +181,27 @@
       
         <div class="navbar-item navbar-persistent--container">
           
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
         </div>
       
       
         <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -199,18 +212,21 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
-<script>
-document.write(`
-  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
     <i class="fa-solid fa-magnifying-glass"></i>
-  </button>
-`);
-</script>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
     </div>
   
 
   
-    <label class="sidebar-toggle secondary-toggle" for="__secondary">
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
       <span class="fa-solid fa-outdent"></span>
     </label>
   
@@ -230,7 +246,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <p class="sidebar-header-items__title"
      role="heading"
      aria-level="1"
@@ -276,12 +293,13 @@ document.write(`
       <div class="sidebar-header-items__end">
         
           <div class="navbar-item">
+
 <script>
 document.write(`
-  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
-    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
-    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
-    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
   </button>
 `);
 </script></div>
@@ -314,15 +332,15 @@ document.write(`
 
 
 
-<nav aria-label="Breadcrumbs">
-  <ul class="bd-breadcrumbs" role="navigation" aria-label="Breadcrumb">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
     
     <li class="breadcrumb-item breadcrumb-home">
       <a href="../../../index.html" class="nav-link" aria-label="Home">
         <i class="fa-solid fa-home"></i>
       </a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp</span></code></li>
+    <li class="breadcrumb-item active" aria-current="page"><code...</li>
   </ul>
 </nav>
 </div>
@@ -346,7 +364,11 @@ document.write(`
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="annotator/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="annotator/audio/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.audio</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/classifier_dl/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.classifier_dl</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/cleaners/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.cleaners</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/coref/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.coref</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/cv/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.cv</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/dependency/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.dependency</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/embeddings/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.embeddings</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/er/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.er</span></code></a></li>
@@ -360,21 +382,27 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="annotator/sentence/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.sentence</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/sentiment/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.sentiment</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/seq2seq/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.seq2seq</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/similarity/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.similarity</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/spell_check/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.spell_check</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/token/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.token</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/vector_db/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.vector_db</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/ws/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.ws</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/chunk2_doc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.chunk2_doc</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/chunker/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.chunker</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/dataframe_optimizer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.dataframe_optimizer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/date2_chunk/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.date2_chunk</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/document_character_text_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.document_character_text_splitter</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/document_normalizer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.document_normalizer</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/document_title_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.document_title_splitter</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/document_token_splitter/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.document_token_splitter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/document_token_splitter_test/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.document_token_splitter_test</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/graph_extraction/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.graph_extraction</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/lemmatizer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.lemmatizer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/n_gram_generator/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.n_gram_generator</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/normalizer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.normalizer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/stemmer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.stemmer</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/stop_words_cleaner/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.stop_words_cleaner</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="annotator/tf_ner_dl_graph_builder/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.tf_ner_dl_graph_builder</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="annotator/token2_chunk/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotator.token2_chunk</span></code></a></li>
 </ul>
 </li>
@@ -384,11 +412,14 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="base/document_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.document_assembler</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/embeddings_finisher/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.embeddings_finisher</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/finisher/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.finisher</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="base/gguf_ranking_finisher/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.gguf_ranking_finisher</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/graph_finisher/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.graph_finisher</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/has_recursive_fit/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.has_recursive_fit</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/has_recursive_transform/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.has_recursive_transform</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/image_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.image_assembler</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/light_pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.light_pipeline</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="base/multi_column_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.multi_column_assembler</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="base/multi_document_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.multi_document_assembler</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/prompt_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.prompt_assembler</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/recursive_pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.recursive_pipeline</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="base/table_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.base.table_assembler</span></code></a></li>
@@ -399,6 +430,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="common/annotator_approach/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_approach</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="common/annotator_model/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_model</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="common/annotator_properties/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_properties</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="common/annotator_type/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.annotator_type</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="common/completion_post_processing/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.completion_post_processing</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="common/coverage_result/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.coverage_result</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="common/match_strategy/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.match_strategy</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="common/properties/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.common.properties</span></code></a></li>
@@ -420,10 +453,28 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="logging/comet/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.logging.comet</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="partition/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.partition</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="partition/partition/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.partition.partition</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="partition/partition_properties/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.partition.partition_properties</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="partition/partition_transformer/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.partition.partition_transformer</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="pretrained/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.pretrained</span></code></a><ul>
 <li class="toctree-l2"><a class="reference internal" href="pretrained/pretrained_pipeline/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.pretrained.pretrained_pipeline</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="pretrained/resource_downloader/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.pretrained.resource_downloader</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="pretrained/utils/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.pretrained.utils</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reader/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reader/enums/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.enums</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/layout_aligner_for_text/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.layout_aligner_for_text</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/layout_aligner_for_vision/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.layout_aligner_for_vision</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/pdf_to_text/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.pdf_to_text</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/reader2doc/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.reader2doc</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/reader2image/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.reader2image</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/reader2table/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.reader2table</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/reader_assembler/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.reader_assembler</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader/sparknlp_reader/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.reader.sparknlp_reader</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="training/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.training</span></code></a><ul>
@@ -431,6 +482,8 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="training/conllu/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.training.conllu</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="training/pos/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.training.pos</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="training/pub_tator/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.training.pub_tator</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training/spacy_to_annotation/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.training.spacy_to_annotation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="training/tfgraphs/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.training.tfgraphs</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -444,6 +497,7 @@ document.write(`
 <li class="toctree-l1"><a class="reference internal" href="annotation_audio/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotation_audio</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="annotation_image/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.annotation_image</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="functions/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.functions</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload_to_hub/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.upload_to_hub</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="util/index.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sparknlp.util</span></code></a></li>
 </ul>
 </div>
@@ -457,14 +511,40 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#sparknlp.start" title="sparknlp.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>([gpu, apple_silicon, aarch64, memory, ...])</p></td>
 <td><p>Starts a PySpark instance with default parameters for Spark NLP.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#sparknlp.version" title="sparknlp.version"><code class="xref py py-obj docutils literal notranslate"><span class="pre">version</span></code></a>()</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#sparknlp.read" title="sparknlp.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a>([params])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#sparknlp.version" title="sparknlp.version"><code class="xref py py-obj docutils literal notranslate"><span class="pre">version</span></code></a>()</p></td>
 <td><p>Returns the current Spark NLP version.</p></td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Permalink to this heading">#</a></h3>
+<table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#sparknlp.annotators" title="sparknlp.annotators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">annotators</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#sparknlp.embeddings" title="sparknlp.embeddings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">embeddings</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="sparknlp.annotators">
+<span class="sig-name descname"><span class="pre">annotators</span></span><a class="reference internal" href="../../../modules/sparknlp.html#annotators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.annotators" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="sparknlp.embeddings">
+<span class="sig-name descname"><span class="pre">embeddings</span></span><a class="reference internal" href="../../../modules/sparknlp.html#embeddings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.embeddings" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sparknlp.start">
-<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apple_silicon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aarch64</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'16G'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tmp_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_time_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../modules/sparknlp.html#start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.start" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apple_silicon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aarch64</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'16G'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_folder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cluster_tmp_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">real_time_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_sparknlp_maven</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../modules/sparknlp.html#start"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.start" title="Permalink to this definition">#</a></dt>
 <dd><p>Starts a PySpark instance with default parameters for Spark NLP.</p>
 <p>The default parameters would result in the equivalent of:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SparkSession</span><span class="o">.</span><span class="n">builder</span> \
@@ -497,7 +577,9 @@ for WordEmbeddings. By default, this locations is the location of
 <cite>hadoop.tmp.dir</cite> set via Hadoop configuration for Apache Spark. NOTE: <cite>S3</cite> is
 not supported and it must be local, HDFS, or DBFS.</p>
 </dd>
-<dt><strong>params</strong><span class="classifier">dict, optional</span></dt><dd><p>Custom parameters to set for the Spark configuration, by default None.</p>
+<dt><strong>params</strong><span class="classifier">dict, optional</span></dt><dd><p>Custom parameters to set for the Spark configuration, by default None.
+Set <code class="docutils literal notranslate"><span class="pre">skip_sparknlp_maven</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;true&quot;</span></code> to avoid adding the
+default Spark NLP Maven package when a custom Spark NLP jar is provided.</p>
 </dd>
 <dt><strong>cluster_tmp_dir</strong><span class="classifier">str, optional</span></dt><dd><p>The location to save logs from annotators during training. If not set, it will
 be in the users home directory under <cite>annotator_logs</cite>.</p>
@@ -505,6 +587,9 @@ be in the users home directory under <cite>annotator_logs</cite>.</p>
 <dt><strong>real_time_output</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to read and print JVM output in real time, by default False</p>
 </dd>
 <dt><strong>output_level</strong><span class="classifier">int, optional</span></dt><dd><p>Output level for logs, by default 1</p>
+</dd>
+<dt><strong>skip_sparknlp_maven</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether to avoid adding the default Spark NLP Maven package. Use this
+when providing a custom Spark NLP jar with <code class="docutils literal notranslate"><span class="pre">spark.jars</span></code>.</p>
 </dd>
 </dl>
 </dd>
@@ -519,6 +604,11 @@ be in the users home directory under <cite>annotator_logs</cite>.</p>
 <p>Since Spark version 3.2, Python 3.6 is deprecated. If you are using this
 python version, consider sticking to lower versions of Spark.</p>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="sparknlp.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../modules/sparknlp.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sparknlp.read" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="sparknlp.version">
@@ -543,16 +633,12 @@ python version, consider sticking to lower versions of Spark.</p>
               
               
               
-                <footer class="bd-footer-article">
+              
+              
+                <footer class="prev-next-footer">
                   
-<div class="footer-article-items footer-article__inner">
-  
-    <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
-</div></div>
-  
 </div>
-
                 </footer>
               
             </div>
@@ -562,6 +648,7 @@ python version, consider sticking to lower versions of Spark.</p>
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
   <div class="sidebar-secondary-item">
+
   <div class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
@@ -570,8 +657,12 @@ python version, consider sticking to lower versions of Spark.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#package-contents">Package Contents</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.annotators"><code class="docutils literal notranslate"><span class="pre">annotators</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.embeddings"><code class="docutils literal notranslate"><span class="pre">embeddings</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.start"><code class="docutils literal notranslate"><span class="pre">start()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.read"><code class="docutils literal notranslate"><span class="pre">read()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#sparknlp.version"><code class="docutils literal notranslate"><span class="pre">version()</span></code></a></li>
 </ul>
 </li>
@@ -581,6 +672,7 @@ python version, consider sticking to lower versions of Spark.</p>
   </nav></div>
 
   <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../../../_sources/reference/autosummary/sparknlp/index.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -601,8 +693,8 @@ python version, consider sticking to lower versions of Spark.</p>
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
-<script src="../../../static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+  <script src="../../../static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../../../static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -610,17 +702,19 @@ python version, consider sticking to lower versions of Spark.</p>
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
-      © Copyright 2023, John Snow Labs.
+      © Copyright 2026 John Snow Labs.
       <br/>
     
   </p>
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
     <br/>
   </p>
 </div>
@@ -628,10 +722,12 @@ python version, consider sticking to lower versions of Spark.</p>
     </div>
   
   
+  
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.13.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.4.
 </p></div>
       
     </div>
